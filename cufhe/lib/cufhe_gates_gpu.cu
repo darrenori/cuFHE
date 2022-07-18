@@ -65,6 +65,19 @@ void Nand(Ctxt& out,
   CtxtCopyD2H(out, st);
 }
 
+void addition(Ctxt& out,
+          const Ctxt& in0,
+          const Ctxt& in1,
+          Stream st) {
+  static const Torus mu = ModSwitchToTorus(1, 8);
+  static const Torus fix = ModSwitchToTorus(1, 8);
+  CtxtCopyH2D(in0, st);
+  CtxtCopyH2D(in1, st);
+  NandBootstrap(out.lwe_sample_device_, in0.lwe_sample_device_,
+      in1.lwe_sample_device_, mu, fix, st.st());
+  CtxtCopyD2H(out, st);
+}
+
 void Or(Ctxt& out,
         const Ctxt& in0,
         const Ctxt& in1,

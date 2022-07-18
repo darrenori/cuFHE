@@ -100,10 +100,10 @@ int main() {
 
 
   // Here, pass streams to gates for parallel gates.
- // cout<< "------ Test NAND Gate ------" <<endl;
-  //for (int i = 0; i < kNumTests; i ++) {
-   //	Nand(ct[i], ct[i], ct[i + kNumTests], st[i % kNumSMs]);
- // }
+  cout<< "------ Test NAND Gate ------" <<endl;
+  for (int i = 0; i < kNumTests; i ++) {
+    Nand(ct[i], ct[i], ct[i + kNumTests], st[i % kNumSMs]);
+  }
 /*
   cout<< "------ Test OR Gate ------" <<endl;
   for (int i = 0; i < kNumTests; i ++)
@@ -113,9 +113,9 @@ int main() {
   for (int i = 0; i < kNumTests; i ++)
   	Copy(ct[i], ct[i], st[i % kNumaSMs]);
 */
-  cout<< "------ Test NOT Gate ------" <<endl;
-  for (int i = 0; i < kNumTests; i ++)
-  	Not(ct[i], ct[i], st[i % kNumSMs]);
+ // cout<< "------ Test NOT Gate ------" <<endl;
+ // for (int i = 0; i < kNumTests; i ++)
+  //	Not(ct[i], ct[i], st[i % kNumSMs]);
   Synchronize();
 
   cudaEventRecord(stop, 0);
@@ -127,10 +127,10 @@ int main() {
 
   int cnt_failures = 0;
   for (int i = 0; i < kNumTests; i ++) {
-    //NandCheck(pt[i], pt[i], pt[i + kNumTests]);
+    NandCheck(pt[i], pt[i], pt[i + kNumTests]);
     //OrCheck(pt[i], pt[i], pt[i + kNumTests]);
     //CopyCheck(pt[i], pt[i]);
-    NotCheck(pt[i], pt[i]);
+ //   NotCheck(pt[i], pt[i]);
     Decrypt(pt[i + kNumTests], ct[i], pri_key);
     if (pt[i + kNumTests].message_ != pt[i].message_) {
       std::cout << "FAILED" << pt[i+kNumTests].message_ << "||" <<pt[i].message_ << "\n";

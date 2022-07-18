@@ -69,6 +69,7 @@ private:
 void And (Ctxt& out, const Ctxt& in0, const Ctxt& in1, Stream st = 0);
 void Or  (Ctxt& out, const Ctxt& in0, const Ctxt& in1, Stream st = 0);
 void Nand(Ctxt& out, const Ctxt& in0, const Ctxt& in1, Stream st = 0);
+void addition(Ctxt& out, const Ctxt& in0, const Ctxt& in1, Stream st = 0);
 void Nor (Ctxt& out, const Ctxt& in0, const Ctxt& in1, Stream st = 0);
 void Xor (Ctxt& out, const Ctxt& in0, const Ctxt& in1, Stream st = 0);
 void Xnor(Ctxt& out, const Ctxt& in0, const Ctxt& in1, Stream st = 0);

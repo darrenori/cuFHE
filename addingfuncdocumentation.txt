@@ -1,0 +1,3 @@
+How to add:
+lib/cufhe_gates_gpu.cu
+include/cufhe_gpu.cu
