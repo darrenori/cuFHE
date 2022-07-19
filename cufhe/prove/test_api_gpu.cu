@@ -64,6 +64,9 @@ int main() {
   PriKey pri_key; // private key
   PubKey pub_key; // public key
 
+  ReadPriKeyFromFile(pri_key,"privatekey1.txt");
+  ReadPubKeyFromFile(pub_key,"publickey1.txt");
+
   Ptxt* pt = new Ptxt[2 * kNumTests];
   Ctxt* ct = new Ctxt[2 * kNumTests];
   Synchronize();
@@ -75,9 +78,6 @@ int main() {
   cout<< "------ Initilizating Data on GPU(s) ------" <<endl;
   Initialize(pub_key); // essential for GPU computing
 
-  //dump private key
-  WritePriKeyToFile(pri_key,"privatekey1.txt");
-  WritePubKeyToFile(pub_key,"publickey1.txt");
 
   cout<< "Number of tests:\t" << kNumTests <<endl;
   // Create CUDA streams for parallel gates.
@@ -90,6 +90,11 @@ int main() {
     pt[i] = rand() % Ptxt::kPtxtSpace;
     Encrypt(ct[i], pt[i], pri_key);
   }
+
+  std::string abc="abc.txt";
+  WriteCtxtToFile(ct[0],abc);
+
+
   Synchronize();
 
   float et;
@@ -104,18 +109,7 @@ int main() {
   for (int i = 0; i < kNumTests; i ++) {
     Nand(ct[i], ct[i], ct[i + kNumTests], st[i % kNumSMs]);
   }
-/*
-  cout<< "------ Test OR Gate ------" <<endl;
-  for (int i = 0; i < kNumTests; i ++)
-  	Or(ct[i], ct[i], ct[i + kNumTests], st[i % kNumSMs]);
 
-  cout<< "------ Test Copy Gate ------" <<endl;
-  for (int i = 0; i < kNumTests; i ++)
-  	Copy(ct[i], ct[i], st[i % kNumaSMs]);
-*/
- // cout<< "------ Test NOT Gate ------" <<endl;
- // for (int i = 0; i < kNumTests; i ++)
-  //	Not(ct[i], ct[i], st[i % kNumSMs]);
   Synchronize();
 
   cudaEventRecord(stop, 0);
