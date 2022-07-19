@@ -126,14 +126,19 @@ int main() {
   for (int i = 0; i < kNumSMs; i ++)
     st[i].Create();
 
+
   correct = true;
   for (int i = 0; i < numBits; i ++) {
-    pt[i] = rand() % Ptxt::kPtxtSpace;
+    //pt[i] = rand() % Ptxt::kPtxtSpace;
+    pt[i] = 0;
+    pt[2]=1;
     Encrypt(ct[i], pt[i], pri_key);
   }
 
   for (int i = 0; i < numBits; i ++) {
-    pt1[i] = rand() % Ptxt::kPtxtSpace;
+    //pt1[i] = rand() % Ptxt::kPtxtSpace;
+    pt1[i] = 0;
+    pt1[2]=1;
     Encrypt(ct1[i], pt1[i], pri_key);
   }
 
@@ -169,6 +174,10 @@ int main() {
   cout<< et / numBits / kNumLevels << " ms / gate" <<endl;
   cudaEventDestroy(start);
   cudaEventDestroy(stop);
+  for (int i =0; i < numBits; i ++){
+	Decrypt(pt1[i], ctRes[i], pri_key);
+	cout << pt1[i].message_;
+  }
 /*
   int cnt_failures = 0;
   for (int i = 0; i < numBits; i ++) {
