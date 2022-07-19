@@ -51,40 +51,6 @@ void CopyCheck(Ptxt& out, const Ptxt& in){
 	out.message_ = in.message_;
 }
 
-void addBits(Ctxt *r, Ctxt &a, Ctxt &b, Ctxt *carry) {
-	Ctxt *t1 = new Ctxt[1];
-    Ctxt *t2 = new Ctxt[1];
-	Xor(t1[0], a, carry[0]);
-    Xor(t2[0], b, carry[0]);
-	Synchronize();
-	Xor(r[0], a, t2[0]);
-	And(t1[0], t1[0], t2[0]);
-	Synchronize();
-	Xor(r[1], carry[0], t1[0]);
-	Synchronize();
-	delete [] t1;
-	delete [] t2;
-}
-
-void addNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int nBits) {
-	
-	Ctxt *carry = new Ctxt[1];
-    Ctxt *bitResult = new Ctxt[2];
-
-	Xor(ctRes[0], ctA[0], ctB[0]);
-	And(carry[0], ctA[0], ctB[0]);
-	Synchronize();
-	for(int i = 1; i < nBits; i++) {
-		addBits(bitResult, ctA[i], ctB[i], carry);
-		Copy(ctRes[i], bitResult[0]);
-		Copy(carry[0], bitResult[1]);
-		Synchronize();
-	}
-	delete [] carry;
-	delete [] bitResult;
-}
-
-
 int main() {
   cudaSetDevice(0);
   cudaDeviceProp prop;
@@ -94,7 +60,7 @@ int main() {
   uint32_t kNumLevels = 4;
   uint32_t val1 = 1;
   uint32_t val2 = 2;
-  int numBits = 32;
+  int nBits = 32;
 
   SetSeed(); // set random seed
 
@@ -104,12 +70,8 @@ int main() {
   ReadPriKeyFromFile(pri_key,"privatekey1.txt");
   ReadPubKeyFromFile(pub_key,"publickey1.txt");
 
-  Ptxt* pt = new Ptxt[numBits * 2];
-  Ptxt* pt1 = new Ptxt[numBits * 2];
-  Ptxt* ptRes = new Ptxt[numBits * 2];
-  Ctxt* ct = new Ctxt[numBits * 2];
-  Ctxt* ct1 = new Ctxt[numBits * 2];
-  Ctxt* ctRes = new Ctxt[numBits * 2];
+  Ptxt* pt = new Ptxt[2 * kNumTests];
+  Ctxt* ct = new Ctxt[2 * kNumTests];
   Synchronize();
   bool correct;
 
@@ -120,25 +82,21 @@ int main() {
   Initialize(pub_key); // essential for GPU computing
 
 
-  cout<< "Number of tests:\t" << numBits <<endl;
+  cout<< "Number of tests:\t" << kNumTests <<endl;
   // Create CUDA streams for parallel gates.
   Stream* st = new Stream[kNumSMs];
   for (int i = 0; i < kNumSMs; i ++)
     st[i].Create();
 
   correct = true;
-  for (int i = 0; i < numBits; i ++) {
+  for (int i = 0; i < 2 * kNumTests; i ++) {
     pt[i] = rand() % Ptxt::kPtxtSpace;
     Encrypt(ct[i], pt[i], pri_key);
   }
 
-  for (int i = 0; i < numBits; i ++) {
-    pt1[i] = rand() % Ptxt::kPtxtSpace;
-    Encrypt(ct1[i], pt1[i], pri_key);
-  }
-
   std::string abc="abc.txt";
   WriteCtxtToFile(ct[0],abc);
+
 
   Synchronize();
 
@@ -150,47 +108,40 @@ int main() {
 
 
   // Here, pass streams to gates for parallel gates.
-  /*cout<< "------ Test NAND Gate ------" <<endl;
-  for (int i = 0; i < numBits; i ++) {
-    Nand(ctRes[i], ct[i], ct1[i], st[i % kNumSMs]);
-  }*/
-
-
+  cout<< "------ Test NAND Gate ------" <<endl;
+  for (int i = 0; i < kNumTests; i ++) {
+    Nand(ct[i], ct[i], ct[i + kNumTests], st[i % kNumSMs]);
+  }
 
   Synchronize();
-  
-
-  addNumbers(ctRes, ct, ct1, numBits);
-
 
   cudaEventRecord(stop, 0);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&et, start, stop);
-  cout<< et / numBits / kNumLevels << " ms / gate" <<endl;
+  cout<< et / kNumTests / kNumLevels << " ms / gate" <<endl;
   cudaEventDestroy(start);
   cudaEventDestroy(stop);
-/*
+
   int cnt_failures = 0;
-  for (int i = 0; i < numBits; i ++) {
-    NandCheck(ptRes[i], pt[i], pt1[i]);
-    Decrypt(pt1[i], ctRes[i], pri_key);
-    if (pt1[i].message_ != ptRes[i].message_) {
-      std::cout << "FAILED" << pt1[i].message_ << "||" <<ptRes[i].message_ << "\n";
+  for (int i = 0; i < kNumTests; i ++) {
+    NandCheck(pt[i], pt[i], pt[i + kNumTests]);
+    //OrCheck(pt[i], pt[i], pt[i + kNumTests]);
+    //CopyCheck(pt[i], pt[i]);
+ //   NotCheck(pt[i], pt[i]);
+    Decrypt(pt[i + kNumTests], ct[i], pri_key);
+    if (pt[i + kNumTests].message_ != pt[i].message_) {
+      std::cout << "FAILED" << pt[i+kNumTests].message_ << "||" <<pt[i].message_ << "\n";
       correct = false;
       cnt_failures += 1;
       //std::cout<< "Fail at iteration: " << i <<std::endl;
     }
   }
-
-
- 
   if (correct)
     cout<< "PASS" <<endl;
   else
-    cout<< "FAIL:\t" << cnt_failures << "/" << numBits <<endl;
+    cout<< "FAIL:\t" << cnt_failures << "/" << kNumTests <<endl;
   for (int i = 0; i < kNumSMs; i ++)
     st[i].Destroy();
-  */
   delete [] st;
 
   cout<< "------ Cleaning Data on GPU(s) ------" <<endl;

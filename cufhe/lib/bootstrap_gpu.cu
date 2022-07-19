@@ -508,7 +508,7 @@ void AndBootstrap(LWESample* out, LWESample* in0, LWESample* in1,
   CuCheckError();
 }
 
-void AdditionBootstrap(){
+void AdditionBootstrap(LWESample* out, LWESample* in0, LWESample * in1, Torus mu, Torus fix, cudaStream_t st){
 
 }
 

@@ -71,5 +71,10 @@ void XnorBootstrap(LWESample* out,
                   Torus mu,
                   Torus fix,
                   cudaStream_t st);
-
+void AdditionBootstrap(LWESample* out,
+                  LWESample* in0,
+                  LWESample* in1,
+                  Torus mu,
+                  Torus fix,
+                  cudaStream_t st);
 } // namespace cufhe
