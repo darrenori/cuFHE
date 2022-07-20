@@ -113,8 +113,8 @@ int main() {
   Synchronize();
   bool correct;
 
-  cout<< "------ Key Generation ------" <<endl;
-  KeyGen(pub_key, pri_key);
+ // cout<< "------ Key Generation ------" <<endl;
+ // KeyGen(pub_key, pri_key);
 
   cout<< "------ Initilizating Data on GPU(s) ------" <<endl;
   Initialize(pub_key); // essential for GPU computing
