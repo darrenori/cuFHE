@@ -101,8 +101,8 @@ int main() {
   PriKey pri_key; // private key
   PubKey pub_key; // public key
 
-  ReadPriKeyFromFile(pri_key,"privatekey1.txt");
-  ReadPubKeyFromFile(pub_key,"publickey1.txt");
+  ReadPriKeyFromFile(pri_key,"finalkeys/privatekey1.txt");
+  ReadPubKeyFromFile(pub_key,"finalkeys/publickey1.txt");
 
   Ptxt* pt = new Ptxt[numBits * 2];
   Ptxt* pt1 = new Ptxt[numBits * 2];
@@ -142,8 +142,8 @@ int main() {
     Encrypt(ct1[i], pt1[i], pri_key);
   }
 
-  std::string abc="abc.txt";
-  WriteCtxtToFile(ct[0],abc);
+ // std::string abc="abc.txt";
+ // WriteCtxtToFile(ct[0],abc);
 
   Synchronize();
 
@@ -155,17 +155,17 @@ int main() {
 
 
   // Here, pass streams to gates for parallel gates.
-  /*cout<< "------ Test NAND Gate ------" <<endl;
+  cout<< "------ Test NAND Gate ------" <<endl;
   for (int i = 0; i < numBits; i ++) {
     Nand(ctRes[i], ct[i], ct1[i], st[i % kNumSMs]);
-  }*/
+  }
 
 
 
   Synchronize();
   
 
-  addNumbers(ctRes, ct, ct1, numBits);
+//  addNumbers(ctRes, ct, ct1, numBits);
 
 
   cudaEventRecord(stop, 0);
@@ -174,11 +174,11 @@ int main() {
   cout<< et / numBits / kNumLevels << " ms / gate" <<endl;
   cudaEventDestroy(start);
   cudaEventDestroy(stop);
-  for (int i =0; i < numBits; i ++){
+ /* for (int i =0; i < numBits; i ++){
 	Decrypt(pt1[i], ctRes[i], pri_key);
 	cout << pt1[i].message_;
-  }
-/*
+  }*/
+
   int cnt_failures = 0;
   for (int i = 0; i < numBits; i ++) {
     NandCheck(ptRes[i], pt[i], pt1[i]);
@@ -199,7 +199,7 @@ int main() {
     cout<< "FAIL:\t" << cnt_failures << "/" << numBits <<endl;
   for (int i = 0; i < kNumSMs; i ++)
     st[i].Destroy();
-  */
+  
   delete [] st;
 
   cout<< "------ Cleaning Data on GPU(s) ------" <<endl;

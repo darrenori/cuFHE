@@ -37,8 +37,8 @@ int main(int argc, char const* argv[])
     Ctxt* ct = new Ctxt[2 * kNumTests];
     Synchronize();
 
-    // End of Generation of CT
 
+    // End of Generation of CT
     char* hello = "Hello from client";
     char buffer[1024] = { 0 };
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -51,7 +51,7 @@ int main(int argc, char const* argv[])
   
     // Convert IPv4 and IPv6 addresses from text to binary
     // form
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)
+    if (inet_pton(AF_INET, "69.69.69.1", &serv_addr.sin_addr)
         <= 0) {
         printf(
             "\nInvalid address/ Address not supported \n");
@@ -65,12 +65,13 @@ int main(int argc, char const* argv[])
         printf("\nConnection Failed \n");
         return -1;
     }
-    send(sock, ct, strlen(ct), 0);
-    printf("Hello message sent\n");
+    send(sock, hello, strlen(hello), 0);
+    printf("Sending to server...\n");
     valread = read(sock, buffer, 1024);
     printf("%s\n", buffer);
   
     // closing the connected socket
     close(client_fd);
     return 0;
+    
 }
