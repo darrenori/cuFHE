@@ -78,7 +78,7 @@ int main(int argc, char const* argv[])
     }
 
     for (int i = 0; i < numBits; i ++) {
-	    string filename = "cipher1/ct1" + std::to_string(i);
+	    string filename = "cipher1/ct" + std::to_string(i);
 	    WriteCtxtToFile(ct1[i],filename);
     }
 
