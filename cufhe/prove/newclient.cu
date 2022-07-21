@@ -117,7 +117,7 @@ int main(int argc, char const* argv[])
     }
 */
 
-
+/*
 
     // Change this IP
   char *ip = "69.69.69.1";
@@ -164,18 +164,17 @@ int main(int argc, char const* argv[])
 
 
 
-  return 0;
+  */
 
 
     //-------------------READING BACK DATA FROM SERVER----------------------//
     for (int i = 0; i < numBits; i ++) {
-            string filename = "cipherresult/ct" + std::to_string(i);
+            string filename = "cipherRes/ct" + std::to_string(i);
             ReadCtxtFromFile(ctRes[i],filename);
     }
 
 
     //READ COMPUTED DATA FROM SERVER HERE!
-
     int cnt_failures = 0;
     for (int i = 0; i < numBits; i ++) {
       NandCheck(ptRes[i], pt[i], pt1[i]);
