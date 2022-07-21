@@ -90,16 +90,16 @@ int main() {
   cudaDeviceProp prop;
   cudaGetDeviceProperties(&prop, 0);
   uint32_t kNumSMs = prop.multiProcessorCount;
-  uint32_t kNumTests = kNumSMs * 32;// * 8;
+ // uint32_t kNumTests = kNumSMs * 32;// * 8;
   uint32_t kNumLevels = 4;
-  uint32_t val1 = 1;
-  uint32_t val2 = 2;
+ // uint32_t val1 = 1;
+ // uint32_t val2 = 2;
   int numBits = 32;
 
   SetSeed(); // set random seed
 
-  PriKey pri_key; // private key
-  PubKey pub_key; // public key
+  PriKey pri_key; // public key
+  PubKey pub_key;
 
   ReadPriKeyFromFile(pri_key,"finalkeys/privatekey1.txt");
   ReadPubKeyFromFile(pub_key,"finalkeys/publickey1.txt");
@@ -112,9 +112,7 @@ int main() {
   Ctxt* ctRes = new Ctxt[numBits * 2];
   Synchronize();
   bool correct;
-
- // cout<< "------ Key Generation ------" <<endl;
- // KeyGen(pub_key, pri_key);
+  correct = true;
 
   cout<< "------ Initilizating Data on GPU(s) ------" <<endl;
   Initialize(pub_key); // essential for GPU computing
@@ -127,7 +125,6 @@ int main() {
     st[i].Create();
 
 
-  correct = true;
   for (int i = 0; i < numBits; i ++) {
     //pt[i] = rand() % Ptxt::kPtxtSpace;
     pt[i] = 0;
