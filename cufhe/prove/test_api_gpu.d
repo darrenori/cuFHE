@@ -183,29 +183,8 @@ newclient.o : prove/newclient.cu \
     /usr/include/x86_64-linux-gnu/bits/types/struct_osockaddr.h \
     /usr/include/x86_64-linux-gnu/bits/socket2.h \
     /usr/include/x86_64-linux-gnu/bits/in.h \
-    /usr/include/unistd.h \
-    /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
-    /usr/include/x86_64-linux-gnu/bits/environments.h \
-    /usr/include/x86_64-linux-gnu/bits/confname.h \
-    /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
-    /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
-    /usr/include/x86_64-linux-gnu/bits/unistd.h \
-    /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
-    ./include/cufhe_gpu.cuh \
-    ./include/cufhe.h \
-    ./include/cufhe_core.h \
-    ./include/details/math.h \
-    /usr/lib/gcc/x86_64-linux-gnu/8/include/stdint.h \
-    /usr/include/stdint.h \
-    /usr/include/x86_64-linux-gnu/bits/wchar.h \
-    ./include/details/assert.h \
-    ./include/details/allocator.h \
-    /usr/include/c++/8/utility \
-    /usr/include/c++/8/bits/stl_relops.h \
-    /usr/include/c++/8/bits/stl_pair.h \
-    /usr/include/c++/8/initializer_list \
-    /usr/include/c++/8/iostream \
-    /usr/include/c++/8/ostream \
+    /usr/include/c++/8/fstream \
+    /usr/include/c++/8/istream \
     /usr/include/c++/8/ios \
     /usr/include/c++/8/iosfwd \
     /usr/include/c++/8/bits/stringfwd.h \
@@ -213,6 +192,7 @@ newclient.o : prove/newclient.cu \
     /usr/include/c++/8/bits/postypes.h \
     /usr/include/c++/8/cwchar \
     /usr/include/wchar.h \
+    /usr/include/x86_64-linux-gnu/bits/wchar.h \
     /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
     /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
     /usr/include/x86_64-linux-gnu/bits/wchar2.h \
@@ -220,6 +200,7 @@ newclient.o : prove/newclient.cu \
     /usr/include/c++/8/bits/stl_algobase.h \
     /usr/include/c++/8/bits/functexcept.h \
     /usr/include/c++/8/ext/numeric_traits.h \
+    /usr/include/c++/8/bits/stl_pair.h \
     /usr/include/c++/8/bits/stl_iterator_base_types.h \
     /usr/include/c++/8/bits/stl_iterator_base_funcs.h \
     /usr/include/c++/8/debug/assertions.h \
@@ -228,6 +209,8 @@ newclient.o : prove/newclient.cu \
     /usr/include/c++/8/debug/debug.h \
     /usr/include/c++/8/bits/predefined_ops.h \
     /usr/include/c++/8/cstdint \
+    /usr/lib/gcc/x86_64-linux-gnu/8/include/stdint.h \
+    /usr/include/stdint.h \
     /usr/include/c++/8/bits/localefwd.h \
     /usr/include/x86_64-linux-gnu/c++/8/bits/c++locale.h \
     /usr/include/c++/8/clocale \
@@ -256,6 +239,7 @@ newclient.o : prove/newclient.cu \
     /usr/include/c++/8/bits/stl_function.h \
     /usr/include/c++/8/backward/binders.h \
     /usr/include/c++/8/bits/range_access.h \
+    /usr/include/c++/8/initializer_list \
     /usr/include/c++/8/bits/basic_string.h \
     /usr/include/c++/8/ext/alloc_traits.h \
     /usr/include/c++/8/bits/alloc_traits.h \
@@ -287,6 +271,27 @@ newclient.o : prove/newclient.cu \
     /usr/include/x86_64-linux-gnu/c++/8/bits/ctype_inline.h \
     /usr/include/c++/8/bits/locale_facets.tcc \
     /usr/include/c++/8/bits/basic_ios.tcc \
+    /usr/include/c++/8/ostream \
     /usr/include/c++/8/bits/ostream.tcc \
-    /usr/include/c++/8/istream \
-    /usr/include/c++/8/bits/istream.tcc
+    /usr/include/c++/8/bits/istream.tcc \
+    /usr/include/c++/8/bits/codecvt.h \
+    /usr/include/x86_64-linux-gnu/c++/8/bits/basic_file.h \
+    /usr/include/x86_64-linux-gnu/c++/8/bits/c++io.h \
+    /usr/include/c++/8/bits/fstream.tcc \
+    /usr/include/unistd.h \
+    /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+    /usr/include/x86_64-linux-gnu/bits/environments.h \
+    /usr/include/x86_64-linux-gnu/bits/confname.h \
+    /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
+    /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
+    /usr/include/x86_64-linux-gnu/bits/unistd.h \
+    /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+    ./include/cufhe_gpu.cuh \
+    ./include/cufhe.h \
+    ./include/cufhe_core.h \
+    ./include/details/math.h \
+    ./include/details/assert.h \
+    ./include/details/allocator.h \
+    /usr/include/c++/8/utility \
+    /usr/include/c++/8/bits/stl_relops.h \
+    /usr/include/c++/8/iostream

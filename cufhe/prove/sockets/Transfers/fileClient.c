@@ -20,9 +20,9 @@ void send_file(FILE *fp, int sockfd){
 
 int main(){
   // Change this IP	
-  char *ip = "127.0.0.1";
+  char *ip = "69.69.69.1";
   // Change this host port
-  int port = 8080;
+  int port = 4380;
   int e;
 
   int sockfd;
