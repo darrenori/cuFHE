@@ -233,6 +233,22 @@ int main() {
   Initialize(pub_key); // essential for GPU computing
 
 
+
+  //RECEIVE DATA FROM CLIENT!
+  Client_socket C;
+  C.receive_file();
+  C.split_file();
+
+
+  for (int i = 0; i < numBits; i ++) {
+	  ReadCtxtFromFile(ct[i],"cipher/ct"+std::to_string(i));
+  }
+
+  for (int i = 32; i < numBits; i ++) {
+	  ReadCtxtFromFile(ct1[i],"cipher/ct"+std::to_string(i));
+  }
+
+
   cout<< "Number of tests:\t" << numBits <<endl;
   // Create CUDA streams for parallel gates.
   Stream* st = new Stream[kNumSMs];
@@ -242,15 +258,9 @@ int main() {
 
   Synchronize();
 
-  for (int i = 0; i < numBits; i ++) {
-	  ReadCtxtFromFile(ct[i],"cipher/ct"+std::to_string(i));
-  }
 
-  for (int i = 0; i < numBits; i ++) {
-	  ReadCtxtFromFile(ct1[i],"cipher1/ct"+std::to_string(i));
-  }
 
-return 0;
+
 
   float et;
   cudaEvent_t start, stop;
