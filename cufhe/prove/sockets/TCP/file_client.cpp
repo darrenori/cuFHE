@@ -94,8 +94,9 @@ class Client_socket{
     	 	std::string line;
     		while (std::getline(file, line)) {
 		      int fileChoice = floor(count/2);
-		      ofstream Myfile(filenames[fileChoice]);
-		      Myfile << line.c_str();
+	              ofstream Myfile;
+		      Myfile.open(filenames[fileChoice], fstream::app);
+		      Myfile << line.c_str() << endl;
 		      count += 1; 
 	        };
 	     };
