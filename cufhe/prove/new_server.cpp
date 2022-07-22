@@ -34,7 +34,7 @@ class Server_socket{
             set_listen_set();
             accept_connection();
 
-            file.open("send.txt", ios::in | ios::binary);
+            file.open("overall", ios::in | ios::binary);
             if(file.is_open()){
                 cout<<"[LOG] : File is ready to Transmit.\n";
             }
