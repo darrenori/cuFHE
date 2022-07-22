@@ -48,7 +48,7 @@ int main(){
   struct sockaddr_in server_addr, new_addr;
   FILE *fp;
   // Change this file name and file path if you need
-  char *filename = "send.txt";
+  char *filename = "overall";
 
   socklen_t addr_size;
 

@@ -1,6 +1,5 @@
 // Client side C/C++ program to demonstrate Socket
 // programming
-#include <arpa/inet.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <string.h>
@@ -12,6 +11,8 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <netinet/in.h>
+
 
   
 #include <include/cufhe_gpu.cuh>
@@ -22,6 +23,87 @@ using namespace std;
 
 
 
+
+class Server_socket{
+    fstream file;
+
+    int PORT;
+
+    int general_socket_descriptor;
+    int new_socket_descriptor;
+
+    struct sockaddr_in address;
+    int address_length;
+
+    public:
+        Server_socket(){
+            create_socket();
+            PORT = 8050;
+
+            address.sin_family = AF_INET;
+            address.sin_addr.s_addr = INADDR_ANY;
+            address.sin_port = htons( PORT );
+            address_length = sizeof(address);
+
+            bind_socket();
+            set_listen_set();
+            accept_connection();
+
+            file.open("cipher/overall", ios::in | ios::binary);
+            if(file.is_open()){
+                cout<<"[LOG] : File is ready to Transmit.\n";
+            }
+            else{
+                cout<<"[ERROR] : File loading failed, Exititng.\n";
+                exit(EXIT_FAILURE);
+            }
+        }
+
+
+	void create_socket(){
+            if ((general_socket_descriptor = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+                perror("[ERROR] : Socket failed");
+                exit(EXIT_FAILURE);
+            }
+            cout<<"[LOG] : Socket Created Successfully.\n";
+        }
+
+        void bind_socket(){
+            if (bind(general_socket_descriptor, (struct sockaddr *)&address, sizeof(address))<0) {
+                perror("[ERROR] : Bind failed");
+                exit(EXIT_FAILURE);
+            }
+            cout<<"[LOG] : Bind Successful.\n";
+        }
+
+        void set_listen_set(){
+            if (listen(general_socket_descriptor, 3) < 0) {
+                perror("[ERROR] : Listen");
+                exit(EXIT_FAILURE);
+            }
+            cout<<"[LOG] : Socket in Listen State (Max Connection Queue: 3)\n";
+        }
+
+        void accept_connection(){
+            if ((new_socket_descriptor = accept(general_socket_descriptor, (struct sockaddr *)&address, (socklen_t*)&address_length))<0) {
+                perror("[ERROR] : Accept");
+                exit(EXIT_FAILURE);
+            }
+            cout<<"[LOG] : Connected to Client.\n";
+        }
+
+        void transmit_file(){
+            std::string contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            cout<<"[LOG] : Transmission Data Size "<<contents.length()<<" Bytes.\n";
+
+            cout<<"[LOG] : Sending...\n";
+
+            int bytes_sent = send(new_socket_descriptor , contents.c_str() , contents.length() , 0 );
+            cout<<"[LOG] : Transmitted Data Size "<<bytes_sent<<" Bytes.\n";
+
+            cout<<"[LOG] : File Transfer Complete.\n";
+        }
+};
 
 
 void NandCheck(Ptxt& out, const Ptxt& in0, const Ptxt& in1) {
@@ -86,13 +168,9 @@ int main(int argc, char const* argv[])
     for (int i = 0; i < numBits; i ++) {
 	    string filename = "cipher/ct" + std::to_string(i);
 	    WriteCtxtToFile(ct[i],filename);
-    }
-
-    for (int i = 0; i < numBits; i ++) {
-	    string filename = "cipher1/ct" + std::to_string(i);
+	    filename = "cipher1/ct" + std::to_string(i);
 	    WriteCtxtToFile(ct1[i],filename);
     }
-
 
     remove("cipher/overall");
     for (int i = 0; i < numBits; i ++) {
@@ -101,10 +179,16 @@ int main(int argc, char const* argv[])
 	    of_c << if_a.rdbuf();
     }
 
+    for (int i = 0; i < numBits; i ++) {
+	    std::ifstream if_a("cipher1/ct"+std::to_string(i),std::ios_base::app);
+	    std::ofstream of_c("cipher/overall",std::ios_base::app);
+	    of_c << if_a.rdbuf();
+    }
 
 
 
-
+    Server_socket S;
+    S.transmit_file();
 
 
  
