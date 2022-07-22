@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <fstream>
 #include <unistd.h>
-#define SIZE 500000
+#define SIZE 2300000
 
 void write_file(int sockfd){
   int n, fileChoice;
