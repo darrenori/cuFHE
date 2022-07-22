@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
+#include <ios>
 
   
 #include <include/cufhe_gpu.cuh>
@@ -156,7 +157,6 @@ int main(int argc, char const* argv[])
 
 
     Synchronize();
-
 
 
 
