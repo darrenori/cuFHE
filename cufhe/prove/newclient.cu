@@ -193,6 +193,7 @@ int main(int argc, char const* argv[])
 
 
     //-------------------READING BACK DATA FROM SERVER----------------------//
+    //@RUSSEL HERE
     for (int i = 0; i < numBits; i ++) {
             string filename = "cipherRes/ct" + std::to_string(i);
             ReadCtxtFromFile(ctRes[i],filename);

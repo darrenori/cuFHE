@@ -15,10 +15,6 @@ nvcc -std=c++11 -O3 -w  -I./ -M -o $dire/test_api_gpu.d $dire/newclient.cu
 nvcc -std=c++11 -O3 -w  -I./ -c -o $dire/newclient.o $dire/newclient.cu
 nvcc -std=c++11 -O3 -w  -o $dire/newclient $dire/newclient.o -Lbin -lcufhe_gpu
 
-<<<<<<< HEAD
-=======
-
->>>>>>> b2581706a5ac0990431d3c3bfb621c605ecb2cba
 nvcc -c $dire/newserver.cu
 nvcc -std=c++11 -O3 -w  -I./ -M -o $dire/test_api_gpu.d $dire/newserver.cu
 nvcc -std=c++11 -O3 -w  -I./ -c -o $dire/newserver.o $dire/newserver.cu
