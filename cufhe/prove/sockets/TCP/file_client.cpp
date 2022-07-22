@@ -7,6 +7,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <strings.h>
+#include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -28,7 +30,7 @@ class Client_socket{
             address.sin_family = AF_INET;
             address.sin_port = htons( PORT );
             address_length = sizeof(address);
-            if(inet_pton(AF_INET, "69.69.69.2", &address.sin_addr)<=0) { 
+            if(inet_pton(AF_INET, "127.0.0.1", &address.sin_addr)<=0) { 
                 cout<<"[ERROR] : Invalid address\n";
             }
 
@@ -74,13 +76,36 @@ class Client_socket{
 	    };
 //            cout<<"[LOG] : Data received "<<valread<<" bytes\n";
             cout<<"[LOG] : Saving data to file.\n";
-            
             cout<<"[LOG] : File Saved.\n";
+	    file.close();
         }
+
+	void split_file(){
+            int count = 0;
+	    std::ifstream file("rec.txt");
+	    
+	    std::string filenames[32];
+            for (int i = 0; i < 5; i ++){
+                string filename = "Ctxt" + std::to_string(i);
+		filenames[i] = filename;
+	    };
+
+	    if (file.is_open()) {
+    	 	std::string line;
+    		while (std::getline(file, line)) {
+		      int fileChoice = floor(count/2);
+		      ofstream Myfile(filenames[fileChoice]);
+		      Myfile << line.c_str();
+		      count += 1; 
+	        };
+	     };
+        };
 };
 
 int main(){
     Client_socket C;
     C.receive_file();
+    C.split_file();
+
     return 0;
-}
+};

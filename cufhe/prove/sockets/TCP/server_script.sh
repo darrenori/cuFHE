@@ -1,4 +1,4 @@
 while true
 do
-	./fileServer
+	./server
 done
