@@ -1,25 +1,18 @@
 // Client side C/C++ program to demonstrate Socket
 // programming
-#include <arpa/inet.h>
-<<<<<<< HEAD
 #include <stdlib.h>
 #include <arpa/inet.h>
-=======
 #include <string.h>
 #include <cmath>
 #include <fstream>
 #include <stdlib.h>
 #include <unistd.h>
->>>>>>> bc36fd060f54999ccb8fe41a0bed7a8b29624f46
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-<<<<<<< HEAD
-#define SIZE 1024
-=======
-#define SIZE 500000
->>>>>>> bc36fd060f54999ccb8fe41a0bed7a8b29624f46
+#include <netinet/in.h>
+
 
   
 #include <include/cufhe_gpu.cuh>
@@ -27,33 +20,90 @@ using namespace cufhe;
 
 #include <iostream>
 using namespace std;
-void send_file(FILE *fp, int sockfd){
-  int n;
-  char data[SIZE] = {0};
-
-  while(fgets(data, SIZE, fp) != NULL) {
-    if (send(sockfd, data, sizeof(data), 0) == -1) {
-      perror("[-]Error in sending file.");
-      exit(1);
-    }
-    bzero(data, SIZE);
-  }
-}
 
 
 
-void send_file(FILE *fp, int sockfd){
-  int n;
-  char data[SIZE] = {0};
 
-  while(fgets(data, SIZE, fp) != NULL) {
-    if (send(sockfd, data, sizeof(data), 0) == -1) {
-      perror("[-]Error in sending file.");
-      exit(1);
-    }
-    bzero(data, SIZE);
-  }
-}
+class Server_socket{
+    fstream file;
+
+    int PORT;
+
+    int general_socket_descriptor;
+    int new_socket_descriptor;
+
+    struct sockaddr_in address;
+    int address_length;
+
+    public:
+        Server_socket(){
+            create_socket();
+            PORT = 8050;
+
+            address.sin_family = AF_INET;
+            address.sin_addr.s_addr = INADDR_ANY;
+            address.sin_port = htons( PORT );
+            address_length = sizeof(address);
+
+            bind_socket();
+            set_listen_set();
+            accept_connection();
+
+            file.open("cipher/overall", ios::in | ios::binary);
+            if(file.is_open()){
+                cout<<"[LOG] : File is ready to Transmit.\n";
+            }
+            else{
+                cout<<"[ERROR] : File loading failed, Exititng.\n";
+                exit(EXIT_FAILURE);
+            }
+        }
+
+
+	void create_socket(){
+            if ((general_socket_descriptor = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+                perror("[ERROR] : Socket failed");
+                exit(EXIT_FAILURE);
+            }
+            cout<<"[LOG] : Socket Created Successfully.\n";
+        }
+
+        void bind_socket(){
+            if (bind(general_socket_descriptor, (struct sockaddr *)&address, sizeof(address))<0) {
+                perror("[ERROR] : Bind failed");
+                exit(EXIT_FAILURE);
+            }
+            cout<<"[LOG] : Bind Successful.\n";
+        }
+
+        void set_listen_set(){
+            if (listen(general_socket_descriptor, 3) < 0) {
+                perror("[ERROR] : Listen");
+                exit(EXIT_FAILURE);
+            }
+            cout<<"[LOG] : Socket in Listen State (Max Connection Queue: 3)\n";
+        }
+
+        void accept_connection(){
+            if ((new_socket_descriptor = accept(general_socket_descriptor, (struct sockaddr *)&address, (socklen_t*)&address_length))<0) {
+                perror("[ERROR] : Accept");
+                exit(EXIT_FAILURE);
+            }
+            cout<<"[LOG] : Connected to Client.\n";
+        }
+
+        void transmit_file(){
+            std::string contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            cout<<"[LOG] : Transmission Data Size "<<contents.length()<<" Bytes.\n";
+
+            cout<<"[LOG] : Sending...\n";
+
+            int bytes_sent = send(new_socket_descriptor , contents.c_str() , contents.length() , 0 );
+            cout<<"[LOG] : Transmitted Data Size "<<bytes_sent<<" Bytes.\n";
+
+            cout<<"[LOG] : File Transfer Complete.\n";
+        }
+};
 
 
 void NandCheck(Ptxt& out, const Ptxt& in0, const Ptxt& in1) {
@@ -111,126 +161,39 @@ int main(int argc, char const* argv[])
 
 
 
-/*
+
     //-----------------------SENDING DATA OVER----------------------------
 
     //DUMP CTXT FILES TO SEND
     for (int i = 0; i < numBits; i ++) {
 	    string filename = "cipher/ct" + std::to_string(i);
 	    WriteCtxtToFile(ct[i],filename);
-    }
-
-    for (int i = 0; i < numBits; i ++) {
-	    string filename = "cipher1/ct" + std::to_string(i);
+	    filename = "cipher1/ct" + std::to_string(i);
 	    WriteCtxtToFile(ct1[i],filename);
     }
 
-
-<<<<<<< HEAD
-
-    // Change this IP
-  char *ip = "69.69.69.1";
-  // Change this host port
-  int port = 4380;
-  int e;
-
-  int sockfd;
-  struct sockaddr_in server_addr;
-  FILE *fp;
-  // Change this file name and file path if you need
-  char *filename = "send.txt";
-
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if(sockfd < 0) {
-    perror("[-]Error in socket");
-    exit(1);
-  }
-  printf("[+]Server socket created successfully.\n");
- 
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_port = port;
-  server_addr.sin_addr.s_addr = inet_addr(ip);
-
-  e = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-  if(e == -1) {
-    perror("[-]Error in socket");
-    exit(1);
-  }
-        printf("[+]Connected to Server.\n");
-
-  fp = fopen(filename, "r");
-  if (fp == NULL) {
-    perror("[-]Error in reading file.");
-    exit(1);
-  }
-
-  send_file(fp, sockfd);
-  printf("[+]File data sent successfully.\n");
-
-=======
     remove("cipher/overall");
-    for (int i=0; i< numBits; i++) {
-	    std::ifstream if_a("cipher/ct"+std::to_string(i), std::ios_base::app);
-	    std::ofstream of_a("cipher/overall", std::ios_base::app);
-	    of_a << if_a.rdbuf();
+    for (int i = 0; i < numBits; i ++) {
+	    std::ifstream if_a("cipher/ct"+std::to_string(i),std::ios_base::app);
+	    std::ofstream of_c("cipher/overall",std::ios_base::app);
+	    of_c << if_a.rdbuf();
     }
-    for (int i=0; i< numBits; i++) {
-	    std::ifstream if_a("cipher1/ct"+std::to_string(i), std::ios_base::app);
-	    std::ofstream of_a("cipher/overall", std::ios_base::app);
-	    of_a << if_a.rdbuf();
+
+    for (int i = 0; i < numBits; i ++) {
+	    std::ifstream if_a("cipher1/ct"+std::to_string(i),std::ios_base::app);
+	    std::ofstream of_c("cipher/overall",std::ios_base::app);
+	    of_c << if_a.rdbuf();
     }
-*/
-
-/*
-
-    // Change this IP
-  char *ip = "69.69.69.1";
-  // Change this host port
-  int port = 4380;
-  int e;
-
-  int sockfd;
-  struct sockaddr_in server_addr;
-  FILE *fp;
-  // Change this file name and file path if you need
-  char *filename = "cipher/overall";
-
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if(sockfd < 0) {
-    perror("[-]Error in socket");
-    exit(1);
-  }
-  printf("[+]Server socket created successfully.\n");
-
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_port = port;
-  server_addr.sin_addr.s_addr = inet_addr(ip);
-
-  e = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-  if(e == -1) {
-    perror("[-]Error in socket");
-    exit(1);
-  }
-        printf("[+]Connected to Server.\n");
-
-  fp = fopen(filename, "r");
-  if (fp == NULL) {
-    perror("[-]Error in reading file.");
-    exit(1);
-  }
-
-  send_file(fp, sockfd);
-  printf("[+]File data sent successfully.\n");
-
->>>>>>> bc36fd060f54999ccb8fe41a0bed7a8b29624f46
-        printf("[+]Closing the connection.\n");
-  close(sockfd);
 
 
 
+    Server_socket S;
+    S.transmit_file();
 
-  */
 
+ 
+
+    return 0;
 
     //-------------------READING BACK DATA FROM SERVER----------------------//
     for (int i = 0; i < numBits; i ++) {
