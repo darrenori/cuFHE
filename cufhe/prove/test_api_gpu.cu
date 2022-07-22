@@ -96,20 +96,19 @@ int main() {
  // uint32_t val2 = 2;
   int numBits = 32;
 
-  SetSeed(); // set random seed
+  //SetSeed(); // set random seed
 
   PriKey pri_key; // public key
   PubKey pub_key;
 
-  ReadPriKeyFromFile(pri_key,"finalkeys/privatekey1.txt");
   ReadPubKeyFromFile(pub_key,"finalkeys/publickey1.txt");
 
-  Ptxt* pt = new Ptxt[numBits * 2];
-  Ptxt* pt1 = new Ptxt[numBits * 2];
-  Ptxt* ptRes = new Ptxt[numBits * 2];
-  Ctxt* ct = new Ctxt[numBits * 2];
-  Ctxt* ct1 = new Ctxt[numBits * 2];
-  Ctxt* ctRes = new Ctxt[numBits * 2];
+  Ptxt* pt = new Ptxt[numBits];
+  Ptxt* pt1 = new Ptxt[numBits];
+  Ptxt* ptRes = new Ptxt[numBits];
+  Ctxt* ct = new Ctxt[numBits];
+  Ctxt* ct1 = new Ctxt[numBits];
+  Ctxt* ctRes = new Ctxt[numBits];
   Synchronize();
   bool correct;
   correct = true;
@@ -125,24 +124,17 @@ int main() {
     st[i].Create();
 
 
-  for (int i = 0; i < numBits; i ++) {
-    //pt[i] = rand() % Ptxt::kPtxtSpace;
-    pt[i] = 0;
-    pt[2]=1;
-    Encrypt(ct[i], pt[i], pri_key);
-  }
-
-  for (int i = 0; i < numBits; i ++) {
-    //pt1[i] = rand() % Ptxt::kPtxtSpace;
-    pt1[i] = 0;
-    pt1[2]=1;
-    Encrypt(ct1[i], pt1[i], pri_key);
-  }
-
- // std::string abc="abc.txt";
- // WriteCtxtToFile(ct[0],abc);
-
   Synchronize();
+
+  for (int i = 0; i < numBits; i ++) {
+	  ReadCtxtFromFile(ct[i],"cipher/ct"+std::to_string(i));
+  }
+
+  for (int i = 0; i < numBits; i ++) {
+	  ReadCtxtFromFile(ct1[i],"cipher1/ct"+std::to_string(i));
+  }
+
+
 
   float et;
   cudaEvent_t start, stop;
@@ -157,43 +149,14 @@ int main() {
     Nand(ctRes[i], ct[i], ct1[i], st[i % kNumSMs]);
   }
 
-
-
   Synchronize();
+
+  for (int i = 0; i < numBits; i ++) {
+	  WriteCtxtToFile(ctRes[i],"cipherRes/ct"+std::to_string(i));
+  }
+  
   
 
-//  addNumbers(ctRes, ct, ct1, numBits);
-
-
-  cudaEventRecord(stop, 0);
-  cudaEventSynchronize(stop);
-  cudaEventElapsedTime(&et, start, stop);
-  cout<< et / numBits / kNumLevels << " ms / gate" <<endl;
-  cudaEventDestroy(start);
-  cudaEventDestroy(stop);
- /* for (int i =0; i < numBits; i ++){
-	Decrypt(pt1[i], ctRes[i], pri_key);
-	cout << pt1[i].message_;
-  }*/
-
-  int cnt_failures = 0;
-  for (int i = 0; i < numBits; i ++) {
-    NandCheck(ptRes[i], pt[i], pt1[i]);
-    Decrypt(pt1[i], ctRes[i], pri_key);
-    if (pt1[i].message_ != ptRes[i].message_) {
-      std::cout << "FAILED" << pt1[i].message_ << "||" <<ptRes[i].message_ << "\n";
-      correct = false;
-      cnt_failures += 1;
-      //std::cout<< "Fail at iteration: " << i <<std::endl;
-    }
-  }
-
-
- 
-  if (correct)
-    cout<< "PASS" <<endl;
-  else
-    cout<< "FAIL:\t" << cnt_failures << "/" << numBits <<endl;
   for (int i = 0; i < kNumSMs; i ++)
     st[i].Destroy();
   

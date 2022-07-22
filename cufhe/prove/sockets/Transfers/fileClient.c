@@ -18,18 +18,39 @@ void send_file(FILE *fp, int sockfd){
   }
 }
 
+void write_file(int sockfd){
+  int n;
+  FILE *fp;
+  char *filename = "results.txt";
+  char buffer[SIZE];
+
+  fp = fopen(filename, "w");
+  while (1) {
+    n = recv(sockfd, buffer, SIZE, 0);
+    if (n <= 0){
+      break;
+      return;
+    }
+    fprintf(fp, "%s", buffer);
+    bzero(buffer, SIZE);
+  }
+  return;
+}
+
 int main(){
   // Change this IP	
   char *ip = "127.0.0.1";
   // Change this host port
-  int port = 8080;
+  int port = 4381;
   int e;
 
-  int sockfd;
-  struct sockaddr_in server_addr;
+  int sockfd, new_sock;
+  struct sockaddr_in server_addr, new_addr;
   FILE *fp;
   // Change this file name and file path if you need
   char *filename = "send.txt";
+
+  socklen_t addr_size;
 
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if(sockfd < 0) {
@@ -57,8 +78,15 @@ int main(){
 
   send_file(fp, sockfd);
   printf("[+]File data sent successfully.\n");
+  
+  printf("[+]Receiving file from server.. \n");
 
-	printf("[+]Closing the connection.\n");
+  addr_size = sizeof(new_addr);
+  new_sock = accept(sockfd, (struct sockaddr*)&new_addr, &addr_size);
+  write_file(new_sock);
+  printf("[+]Data written in the file successfully");
+
+  printf("[+]Closing the connection.\n");
   close(sockfd);
 
   return 0;

@@ -1,10 +1,13 @@
 // Client side C/C++ program to demonstrate Socket
 // programming
 #include <arpa/inet.h>
+#include <stdlib.h>
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#define SIZE 1024
 
 #define PORT 4380
   
@@ -13,6 +16,19 @@ using namespace cufhe;
 
 #include <iostream>
 using namespace std;
+void send_file(FILE *fp, int sockfd){
+  int n;
+  char data[SIZE] = {0};
+
+  while(fgets(data, SIZE, fp) != NULL) {
+    if (send(sockfd, data, sizeof(data), 0) == -1) {
+      perror("[-]Error in sending file.");
+      exit(1);
+    }
+    bzero(data, SIZE);
+  }
+}
+
 
 void NandCheck(Ptxt& out, const Ptxt& in0, const Ptxt& in1) {
   out.message_ = 1 - in0.message_ * in1.message_;
@@ -97,58 +113,48 @@ int main(int argc, char const* argv[])
     }
 
 
-    // End of Generation of CT
-    char buffer[1024] = { 0 };
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        printf("\n Socket creation error \n");
-        return -1;
-    }
-  
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
-  
-    // Convert IPv4 and IPv6 addresses from text to binary
-    // form
-    if (inet_pton(AF_INET, "69.69.69.1", &serv_addr.sin_addr)
-        <= 0) {
-        printf(
-            "\nInvalid address/ Address not supported \n");
-        return -1;
-    }
-  
-    if ((client_fd
-         = connect(sock, (struct sockaddr*)&serv_addr,
-                   sizeof(serv_addr)))
-        < 0) {
-        printf("\nConnection Failed \n");
-        return -1;
-    }
 
+    // Change this IP
+  char *ip = "69.69.69.1";
+  // Change this host port
+  int port = 4380;
+  int e;
 
-    std::string s = std::to_string(23);
-    char const *pchar = s.c_str(); 
+  int sockfd;
+  struct sockaddr_in server_addr;
+  FILE *fp;
+  // Change this file name and file path if you need
+  char *filename = "send.txt";
 
-    send(sock, pchar, strlen(pchar), 0);
-    printf("Sending to server...\n");
-    valread = read(sock, buffer, 1024);
-    printf("%s\n", buffer);
-  
-    // closing the connected socket
-    close(client_fd);
-    
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if(sockfd < 0) {
+    perror("[-]Error in socket");
+    exit(1);
+  }
+  printf("[+]Server socket created successfully.\n");
+ 
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = port;
+  server_addr.sin_addr.s_addr = inet_addr(ip);
 
+  e = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+  if(e == -1) {
+    perror("[-]Error in socket");
+    exit(1);
+  }
+        printf("[+]Connected to Server.\n");
 
+  fp = fopen(filename, "r");
+  if (fp == NULL) {
+    perror("[-]Error in reading file.");
+    exit(1);
+  }
 
+  send_file(fp, sockfd);
+  printf("[+]File data sent successfully.\n");
 
-
-
-
-
-
-
-
-
-
+        printf("[+]Closing the connection.\n");
+  close(sockfd);
 
 
 

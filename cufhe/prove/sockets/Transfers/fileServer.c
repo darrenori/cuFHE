@@ -4,7 +4,8 @@
 #include <cmath>
 #include <arpa/inet.h>
 #include <fstream>
-#define SIZE 1024
+#include <unistd.h>
+#define SIZE 500000
 
 void write_file(int sockfd){
   int n, fileChoice;
@@ -26,7 +27,7 @@ void write_file(int sockfd){
     
     std::ofstream outfile;
     fileChoice = floor(count/2);
-
+    printf("%s", buffer);
     outfile.open(filenames[fileChoice], std::ios_base::app);
     outfile << ("%s", buffer);
     bzero(buffer, SIZE);
@@ -35,9 +36,22 @@ void write_file(int sockfd){
   return;
 }
 
+void send_file(FILE *fp, int sockfd){
+  int n;
+  char data[SIZE] = {0};
+
+  while(fgets(data, SIZE, fp) != NULL) {
+    if (send(sockfd, data, sizeof(data), 0) == -1) {
+      perror("[-]Error in sending file.");
+      exit(1);
+    }
+    bzero(data, SIZE);
+  }
+}
+
 int main(){
-  char *ip = "127.0.0.1";
-  int port = 8080;
+  char *ip = "69.69.69.1";
+  int port = 4380;
   int e;
 
   int sockfd, new_sock;
@@ -74,6 +88,22 @@ int main(){
   new_sock = accept(sockfd, (struct sockaddr*)&new_addr, &addr_size);
   write_file(new_sock);
   printf("[+]Data written in the file successfully.\n");
+/*
+  printf("[+]Preparing to send file over.\n");
+  
+  FILE *fp;
+  char *filename = "return.txt";
 
+  fp = fopen(filename, "r");
+  if (fp == NULL) {
+  	perror("[-]Error in reading gile.");
+	exit(1);
+  }
+
+  send_file(fp, sockfd);
+  printf("[+]File data sent successfully. \n");
+  
+*/
+  
   return 0;
 }
