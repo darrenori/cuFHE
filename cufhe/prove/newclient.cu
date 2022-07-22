@@ -186,14 +186,11 @@ int main(int argc, char const* argv[])
     }
 
 
-
     Server_socket S;
     S.transmit_file();
 
-
- 
-
     return 0;
+
 
     //-------------------READING BACK DATA FROM SERVER----------------------//
     for (int i = 0; i < numBits; i ++) {
