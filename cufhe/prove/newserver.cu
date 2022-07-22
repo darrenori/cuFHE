@@ -218,6 +218,7 @@ int main() {
   PubKey pub_key;
 
   ReadPubKeyFromFile(pub_key,"finalkeys/publickey1.txt");
+  remove("cipher/overall");
 
   Ptxt* pt = new Ptxt[numBits];
   Ptxt* pt1 = new Ptxt[numBits];
@@ -281,6 +282,14 @@ int main() {
 	  WriteCtxtToFile(ctRes[i],"cipherRes/ct"+std::to_string(i));
   }
   
+  //only 32 files for cipheres
+  for (int i = 0; i < numBits; i ++) {
+            std::ifstream if_a("cipherRes/ct"+std::to_string(i),std::ios_base::app);
+            std::ofstream of_c("cipherRes/overall",std::ios_base::app);
+            of_c << if_a.rdbuf();
+  }
+
+
   
 
   for (int i = 0; i < kNumSMs; i ++)
