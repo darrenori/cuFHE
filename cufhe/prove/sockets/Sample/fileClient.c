@@ -41,11 +41,7 @@ int main(){
   // Change this IP	
   char *ip = "69.69.69.1";
   // Change this host port
-<<<<<<< HEAD
-  int port = 4381;
-=======
   int port = 4380;
->>>>>>> bc36fd060f54999ccb8fe41a0bed7a8b29624f46
   int e;
 
   int sockfd, new_sock;
