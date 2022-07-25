@@ -150,7 +150,7 @@ class Client_socket{
             cout<<"[LOG] : File Transfer Complete.\n";	
 	}
 
-}
+};
 
 
 void NandCheck(Ptxt& out, const Ptxt& in0, const Ptxt& in1) {
