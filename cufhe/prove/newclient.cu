@@ -129,7 +129,7 @@ class Client_socket{
 	    fstream file2;
             
             printf("============================\n");	    
-	    file2.open("send.txt", ios::in | ios::binary);
+	    file2.open("cipher/overall", ios::in | ios::binary);
             if(file2.is_open()){
                 cout<<"[LOG] : Send File is ready to Transmit.\n";
             }
@@ -234,10 +234,10 @@ int main(int argc, char const* argv[])
     }
 
 
-    Server_socket S;
-    S.start_everything(port1);
-    S.transmit_file();
-    S.close_socket();
+    Client_socket C;
+    C.start_everything(port1);
+    C.transmit_file();
+    C.close_socket();
 
     return 0;
 

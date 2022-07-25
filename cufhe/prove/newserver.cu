@@ -141,8 +141,7 @@ int main() {
   //RECEIVE DATA FROM CLIENT!
   Client_socket C;
   C.start_everything(port1);
-  C.receive_file();
-  C.split_file();
+  C.transmit_file();
   C.close_socket();
   return 0;
 
