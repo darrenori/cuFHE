@@ -5,5 +5,5 @@ data/**
 publickey1.txt
 privatekey1.txt
 *.o
-test_api_gpu
+prove/test_api_gpu
 newclient
