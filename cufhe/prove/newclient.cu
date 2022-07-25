@@ -23,106 +23,92 @@ using namespace cufhe;
 using namespace std;
 
 
-class Server_socket{
 
+class Client_socket{
     fstream file;
-    fstream file2;
 
     int PORT;
-    int check;
-
+    
     int general_socket_descriptor;
-    int new_socket_descriptor;
+
     struct sockaddr_in address;
     int address_length;
 
     public:
-        Server_socket(){
-
+        Client_socket(){
+	
 	};
 
 	void start_everything(int number){
             create_socket();
-
             PORT = number;
 
-            cout << " The port is: " << PORT << "\n";
-	    address.sin_family = AF_INET;
-            address.sin_addr.s_addr = INADDR_ANY;
+	    cout << "The port is " << PORT << "\n";
+
+            address.sin_family = AF_INET;
             address.sin_port = htons( PORT );
             address_length = sizeof(address);
+            if(inet_pton(AF_INET, "69.69.69.1", &address.sin_addr)<=0) { 
+                cout<<"[ERROR] : Invalid address\n";
+            }
 
-            bind_socket();
-            set_listen_set();
-            accept_connection();
-
-            file.open("cipher/overall", ios::in | ios::binary);
+            create_connection();
+            
+            file.open("cipher/overall", ios::out | ios::trunc | ios::binary);
             if(file.is_open()){
-                cout<<"[LOG] : File is ready to Transmit.\n";
+                cout<<"[LOG] : File Creted.\n";
             }
             else{
-                cout<<"[ERROR] : File loading failed, Exititng.\n";
+                cout<<"[ERROR] : File creation failed, Exititng.\n";
                 exit(EXIT_FAILURE);
             }
-        }
+        };
 
         void create_socket(){
-            if ((general_socket_descriptor = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-                perror("[ERROR] : Socket failed");
+            if ((general_socket_descriptor = socket(AF_INET, SOCK_STREAM, 0)) < 0) { 
+                perror("[ERROR] : Socket failed.\n");
                 exit(EXIT_FAILURE);
             }
             cout<<"[LOG] : Socket Created Successfully.\n";
         }
 
-        void bind_socket(){
-            if (bind(general_socket_descriptor, (struct sockaddr *)&address, sizeof(address))!=0) {
-
-                perror("[ERROR] : Bind failed");
+        void create_connection(){
+            if (connect(general_socket_descriptor, (struct sockaddr *)&address, sizeof(address)) < 0) { 
+                perror("[ERROR] : connection attempt failed.\n");
                 exit(EXIT_FAILURE);
             }
-            cout<<"[LOG] : Bind Successful.\n";
+            cout<<"[LOG] : Connection Successfull.\n";
         }
 
-        void set_listen_set(){
-            if (listen(general_socket_descriptor, 3) < 0) {
-                perror("[ERROR] : Listen");
-                exit(EXIT_FAILURE);
-            }
-            cout<<"[LOG] : Socket in Listen State (Max Connection Queue: 3)\n";
+        void close_socket(){
+	    close(general_socket_descriptor);
+	};
+
+        void receive_file(){
+            char buffer[2200024] = {};
+	    bzero(buffer, sizeof(buffer));
+	    int count = 0;
+	    while(1){
+
+	            int valread = read(general_socket_descriptor , buffer, 2200024);
+		    if(valread == 0)
+			    break;
+		    file<<buffer;
+		    bzero(buffer, sizeof(buffer));
+	    };
+            cout<<"[LOG] : Saving data to file.\n";
+            cout<<"[LOG] : File Saved.\n";
+	    file.close();
+	    close(general_socket_descriptor);
         }
-
-        void accept_connection(){
-            if ((new_socket_descriptor = accept(general_socket_descriptor, (struct sockaddr *)&address, (socklen_t*)&address_length))<0) {
-                perror("[ERROR] : Accept");
-                exit(EXIT_FAILURE);
-            }
-            cout<<"[LOG] : Connected to Client.\n";
-        }
-
-        void transmit_file(){
-            std::string contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-            cout<<"[LOG] : Transmission Data Size "<<contents.length()<<" Bytes.\n";
-
-            cout<<"[LOG] : Sending...\n";
-
-            int bytes_sent = send(new_socket_descriptor , contents.c_str() , contents.length() , 0 );
-            cout<<"[LOG] : Transmitted Data Size "<<bytes_sent<<" Bytes.\n";
-
-            cout<<"[LOG] : File Transfer Complete.\n";
-	    cout<<"===============================\n";
-        }
-
-	void close_socket(){
-            close(new_socket_descriptor);
-	}
 
 	void split_file(){
             int count = 0;
-	    std::ifstream file("return.txt");
-
+	    std::ifstream file("rec.txt");
+	    
 	    std::string filenames[64];
             for (int i = 0; i < 64; i ++){
-                string filename = "Ptxt" + std::to_string(i);
+                string filename = "Ctxt" + std::to_string(i);
 		filenames[i] = filename;
 	    };
 
@@ -133,46 +119,38 @@ class Server_socket{
 	              ofstream Myfile;
 		      Myfile.open(filenames[fileChoice], fstream::app);
 		      Myfile << line.c_str() << endl;
-		      count += 1;
+		      count += 1; 
 	        };
 	     };
         };
+ 
+        void transmit_file(){
 
-	void receive_file(){
-
-            file2.open("return.txt", ios::out | ios::trunc | ios::binary);
+	    fstream file2;
+            
+            printf("============================\n");	    
+	    file2.open("send.txt", ios::in | ios::binary);
             if(file2.is_open()){
-                cout<<"[LOG] : Return File Creted.\n";
+                cout<<"[LOG] : Send File is ready to Transmit.\n";
             }
             else{
-                cout<<"[ERROR] : File creation failed, Exititng.\n";
+                cout<<"[ERROR] : File loading failed, Exititng.\n";
                 exit(EXIT_FAILURE);
             }
 
-	    char buffer[2200024] = {};
-	    bzero(buffer, sizeof(buffer));
-	    int count = 0;
-	    printf("Starting to download file contents");
-	    while(1){
-                    printf("Beginning file contents");
-	            int valread = read(new_socket_descriptor , buffer, 2200024);
-		    printf("%d",valread);
-		    if(valread == 0)
-			    break;
-		    printf("%s", buffer);
-		    file2<<buffer;
-		    bzero(buffer, sizeof(buffer));
-	    };
-            cout<<"[LOG] : Saving data to file.\n";
-            cout<<"[LOG] : File Saved.\n";
-	    file2.close();
+            	    
+            std::string contents((std::istreambuf_iterator<char>(file2)), std::istreambuf_iterator<char>());
+            cout<<"[LOG] : Transmission Data Size "<<contents.length()<<" Bytes.\n";
 
-	    };
+            cout<<"[LOG] : Sending...\n";
 
+            int bytes_sent = send(general_socket_descriptor , contents.c_str() , contents.length() , 0 );
+            cout<<"[LOG] : Transmitted Data Size "<<bytes_sent<<" Bytes.\n";
 
-};
+            cout<<"[LOG] : File Transfer Complete.\n";	
+	}
 
-
+}
 
 
 void NandCheck(Ptxt& out, const Ptxt& in0, const Ptxt& in1) {
