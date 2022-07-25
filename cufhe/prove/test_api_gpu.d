@@ -1,4 +1,4 @@
-newclient.o : prove/newclient.cu \
+newserver.o : prove/newserver.cu \
     /usr/include/stdc-predef.h \
     /usr/include/cuda_runtime.h \
     /usr/include/crt/host_config.h \
@@ -161,30 +161,8 @@ newclient.o : prove/newclient.cu \
     /usr/include/texture_indirect_functions.h \
     /usr/include/surface_indirect_functions.h \
     /usr/include/device_launch_parameters.h \
-    /usr/include/arpa/inet.h \
-    /usr/include/netinet/in.h \
-    /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-    /usr/include/x86_64-linux-gnu/sys/socket.h \
-    /usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h \
-    /usr/include/x86_64-linux-gnu/bits/socket.h \
-    /usr/include/x86_64-linux-gnu/bits/socket_type.h \
-    /usr/include/x86_64-linux-gnu/bits/sockaddr.h \
-    /usr/include/x86_64-linux-gnu/asm/socket.h \
-    /usr/include/asm-generic/socket.h \
-    /usr/include/linux/posix_types.h \
-    /usr/include/linux/stddef.h \
-    /usr/include/x86_64-linux-gnu/asm/posix_types.h \
-    /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
-    /usr/include/asm-generic/posix_types.h \
-    /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
-    /usr/include/asm-generic/bitsperlong.h \
-    /usr/include/x86_64-linux-gnu/asm/sockios.h \
-    /usr/include/asm-generic/sockios.h \
-    /usr/include/x86_64-linux-gnu/bits/types/struct_osockaddr.h \
-    /usr/include/x86_64-linux-gnu/bits/socket2.h \
-    /usr/include/x86_64-linux-gnu/bits/in.h \
-    /usr/include/c++/8/fstream \
-    /usr/include/c++/8/istream \
+    /usr/include/c++/8/iostream \
+    /usr/include/c++/8/ostream \
     /usr/include/c++/8/ios \
     /usr/include/c++/8/iosfwd \
     /usr/include/c++/8/bits/stringfwd.h \
@@ -211,6 +189,7 @@ newclient.o : prove/newclient.cu \
     /usr/include/c++/8/cstdint \
     /usr/lib/gcc/x86_64-linux-gnu/8/include/stdint.h \
     /usr/include/stdint.h \
+    /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
     /usr/include/c++/8/bits/localefwd.h \
     /usr/include/x86_64-linux-gnu/c++/8/bits/c++locale.h \
     /usr/include/c++/8/clocale \
@@ -271,9 +250,10 @@ newclient.o : prove/newclient.cu \
     /usr/include/x86_64-linux-gnu/c++/8/bits/ctype_inline.h \
     /usr/include/c++/8/bits/locale_facets.tcc \
     /usr/include/c++/8/bits/basic_ios.tcc \
-    /usr/include/c++/8/ostream \
     /usr/include/c++/8/bits/ostream.tcc \
+    /usr/include/c++/8/istream \
     /usr/include/c++/8/bits/istream.tcc \
+    /usr/include/c++/8/fstream \
     /usr/include/c++/8/bits/codecvt.h \
     /usr/include/x86_64-linux-gnu/c++/8/bits/basic_file.h \
     /usr/include/x86_64-linux-gnu/c++/8/bits/c++io.h \
@@ -286,6 +266,27 @@ newclient.o : prove/newclient.cu \
     /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
     /usr/include/x86_64-linux-gnu/bits/unistd.h \
     /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+    /usr/include/x86_64-linux-gnu/sys/socket.h \
+    /usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h \
+    /usr/include/x86_64-linux-gnu/bits/socket.h \
+    /usr/include/x86_64-linux-gnu/bits/socket_type.h \
+    /usr/include/x86_64-linux-gnu/bits/sockaddr.h \
+    /usr/include/x86_64-linux-gnu/asm/socket.h \
+    /usr/include/asm-generic/socket.h \
+    /usr/include/linux/posix_types.h \
+    /usr/include/linux/stddef.h \
+    /usr/include/x86_64-linux-gnu/asm/posix_types.h \
+    /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
+    /usr/include/asm-generic/posix_types.h \
+    /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
+    /usr/include/asm-generic/bitsperlong.h \
+    /usr/include/x86_64-linux-gnu/asm/sockios.h \
+    /usr/include/asm-generic/sockios.h \
+    /usr/include/x86_64-linux-gnu/bits/types/struct_osockaddr.h \
+    /usr/include/x86_64-linux-gnu/bits/socket2.h \
+    /usr/include/netinet/in.h \
+    /usr/include/x86_64-linux-gnu/bits/in.h \
+    /usr/include/arpa/inet.h \
     ./include/cufhe_gpu.cuh \
     ./include/cufhe.h \
     ./include/cufhe_core.h \
@@ -293,5 +294,4 @@ newclient.o : prove/newclient.cu \
     ./include/details/assert.h \
     ./include/details/allocator.h \
     /usr/include/c++/8/utility \
-    /usr/include/c++/8/bits/stl_relops.h \
-    /usr/include/c++/8/iostream
+    /usr/include/c++/8/bits/stl_relops.h
