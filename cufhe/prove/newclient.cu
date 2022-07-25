@@ -234,12 +234,12 @@ int main(int argc, char const* argv[])
     }
 
 
+    return 0;
     Client_socket C;
     C.start_everything(port1);
     C.transmit_file();
     C.close_socket();
 
-    return 0;
 
 
     //-------------------READING BACK DATA FROM SERVER----------------------//
