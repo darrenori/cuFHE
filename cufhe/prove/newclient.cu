@@ -23,25 +23,31 @@ using namespace cufhe;
 using namespace std;
 
 
-
-
 class Server_socket{
+
     fstream file;
+    fstream file2;
 
     int PORT;
+    int check;
 
     int general_socket_descriptor;
     int new_socket_descriptor;
-
     struct sockaddr_in address;
     int address_length;
 
     public:
         Server_socket(){
-            create_socket();
-            PORT = 8050;
 
-            address.sin_family = AF_INET;
+	};
+
+	void start_everything(int number){
+            create_socket();
+
+            PORT = number;
+
+            cout << " The port is: " << PORT << "\n";
+	    address.sin_family = AF_INET;
             address.sin_addr.s_addr = INADDR_ANY;
             address.sin_port = htons( PORT );
             address_length = sizeof(address);
@@ -60,8 +66,7 @@ class Server_socket{
             }
         }
 
-
-	void create_socket(){
+        void create_socket(){
             if ((general_socket_descriptor = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
                 perror("[ERROR] : Socket failed");
                 exit(EXIT_FAILURE);
@@ -70,7 +75,8 @@ class Server_socket{
         }
 
         void bind_socket(){
-            if (bind(general_socket_descriptor, (struct sockaddr *)&address, sizeof(address))<0) {
+            if (bind(general_socket_descriptor, (struct sockaddr *)&address, sizeof(address))!=0) {
+
                 perror("[ERROR] : Bind failed");
                 exit(EXIT_FAILURE);
             }
@@ -103,8 +109,70 @@ class Server_socket{
             cout<<"[LOG] : Transmitted Data Size "<<bytes_sent<<" Bytes.\n";
 
             cout<<"[LOG] : File Transfer Complete.\n";
+	    cout<<"===============================\n";
         }
+
+	void close_socket(){
+            close(new_socket_descriptor);
+	}
+
+	void split_file(){
+            int count = 0;
+	    std::ifstream file("return.txt");
+
+	    std::string filenames[64];
+            for (int i = 0; i < 64; i ++){
+                string filename = "Ptxt" + std::to_string(i);
+		filenames[i] = filename;
+	    };
+
+	    if (file.is_open()) {
+    	 	std::string line;
+    		while (std::getline(file, line)) {
+		      int fileChoice = floor(count/501);
+	              ofstream Myfile;
+		      Myfile.open(filenames[fileChoice], fstream::app);
+		      Myfile << line.c_str() << endl;
+		      count += 1;
+	        };
+	     };
+        };
+
+	void receive_file(){
+
+            file2.open("return.txt", ios::out | ios::trunc | ios::binary);
+            if(file2.is_open()){
+                cout<<"[LOG] : Return File Creted.\n";
+            }
+            else{
+                cout<<"[ERROR] : File creation failed, Exititng.\n";
+                exit(EXIT_FAILURE);
+            }
+
+	    char buffer[2200024] = {};
+	    bzero(buffer, sizeof(buffer));
+	    int count = 0;
+	    printf("Starting to download file contents");
+	    while(1){
+                    printf("Beginning file contents");
+	            int valread = read(new_socket_descriptor , buffer, 2200024);
+		    printf("%d",valread);
+		    if(valread == 0)
+			    break;
+		    printf("%s", buffer);
+		    file2<<buffer;
+		    bzero(buffer, sizeof(buffer));
+	    };
+            cout<<"[LOG] : Saving data to file.\n";
+            cout<<"[LOG] : File Saved.\n";
+	    file2.close();
+
+	    };
+
+
 };
+
+
 
 
 void NandCheck(Ptxt& out, const Ptxt& in0, const Ptxt& in1) {
@@ -113,6 +181,8 @@ void NandCheck(Ptxt& out, const Ptxt& in0, const Ptxt& in1) {
 
 int main(int argc, char const* argv[])
 {
+    int port1 = 4380;
+    int port2 = 4381;
     int sock = 0, valread, client_fd;
     struct sockaddr_in serv_addr;
 
@@ -187,7 +257,9 @@ int main(int argc, char const* argv[])
 
 
     Server_socket S;
+    S.start_everything(port1);
     S.transmit_file();
+    S.close_socket();
 
     return 0;
 

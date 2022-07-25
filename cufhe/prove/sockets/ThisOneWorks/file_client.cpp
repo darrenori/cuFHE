@@ -34,7 +34,7 @@ class Client_socket{
             address.sin_family = AF_INET;
             address.sin_port = htons( PORT );
             address_length = sizeof(address);
-            if(inet_pton(AF_INET, "127.0.0.1", &address.sin_addr)<=0) { 
+            if(inet_pton(AF_INET, "69.69.69.2", &address.sin_addr)<=0) { 
                 cout<<"[ERROR] : Invalid address\n";
             }
 
