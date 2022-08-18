@@ -17,8 +17,8 @@ std::pair<int, int> full_adder(int carry_in, int in0, int in1){
 
 
 int main(){
-  std::string a = "1001";
-  std::string b = "1101";
+  std::string a = "11110110100001111011101101011000";
+  std::string b = "10110000011010100010110010000011";
 
   int max = a.size();
   std::string diff;

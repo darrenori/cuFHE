@@ -65,6 +65,7 @@ void CopyCheck(Ptxt& out, const Ptxt& in){
 	out.message_ = in.message_;
 }
 
+
 void addBits(Ctxt *r, Ctxt &a, Ctxt &b, Ctxt *carry) {
 	Ctxt *t1 = new Ctxt[1];
     Ctxt *t2 = new Ctxt[1];
@@ -81,23 +82,166 @@ void addBits(Ctxt *r, Ctxt &a, Ctxt &b, Ctxt *carry) {
 }
 
 void addNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int nBits) {
-	
+  	
 	Ctxt *carry = new Ctxt[1];
-    Ctxt *bitResult = new Ctxt[2];
+        Ctxt *bitResult = new Ctxt[2];
 
-	Xor(ctRes[0], ctA[0], ctB[0]);
-	And(carry[0], ctA[0], ctB[0]);
+	Xor(ctRes[31], ctA[31], ctB[31]);
+	And(carry[0], ctA[31], ctB[31]);
 	Synchronize();
-	for(int i = 1; i < nBits; i++) {
+	for(int i = 30; i > 0; i--) {
 		addBits(bitResult, ctA[i], ctB[i], carry);
 		Copy(ctRes[i], bitResult[0]);
 		Copy(carry[0], bitResult[1]);
 		Synchronize();
 	}
+	Copy(ctRes[0], carry[0]);
+	//Copy(ctRes[nBits-1],carry[0]);
+
+	Synchronize();
 	delete [] carry;
 	delete [] bitResult;
 }
 
+
+
+void twoComplements(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, Ctxt *minusEnd, int nBits){
+             
+	    Ctxt *twoRes = new Ctxt[nBits];
+	
+	    // Inverse B
+            for(int i = 0; i < 32; i++){
+                Not(ctB[i], ctB[i]);
+            }
+ 
+            Synchronize();
+ 
+            // Add One to B
+            addNumbers(twoRes, minusEnd, ctB, nBits);
+ 
+            // Add result to A
+            addNumbers(ctRes, ctA, twoRes, nBits);
+
+       	    Not(ctRes[0], ctRes[0]);
+
+	    delete [] twoRes;
+
+};
+
+void testing(Ctxt *ctRes, Ctxt *test){
+	for ( int i = 0; i < 32; i++){
+		Copy(ctRes[i], test[i]);
+	};
+};
+
+void subNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int nBits) {
+
+        // This equation will have ctB to ALWAYS be negative and ctA ALWAYS postive
+	
+	Ctxt *minusEnd = new Ctxt[nBits];
+	
+	for(int i = 0; i < 32; i ++){
+	    Copy(minusEnd[i], ctA[0]);
+	};
+
+	Not(minusEnd[31], minusEnd[31]);
+
+        twoComplements(ctRes, ctA, ctB, minusEnd, nBits);
+
+	delete [] minusEnd;
+};
+
+void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
+
+	cudaDeviceProp prop;
+	cudaGetDeviceProperties(&prop, 0);
+	uint32_t kNumSMs = prop.multiProcessorCount;
+	Stream* st = new Stream[kNumSMs];
+	for (int i = 0; i < kNumSMs; i ++) {
+		st[i].Create();
+	}
+
+	Ctxt* tempSum = new Ctxt[oBits];
+	Ctxt* tempSum2 = new Ctxt[oBits];
+	Ctxt* andRes = new Ctxt[iBits];
+	Ctxt* empty = new Ctxt[oBits];
+
+	//MAKE IT ZERO
+	Ctxt* zero = new Ctxt[1];
+	And(zero[0],ctA[0],ctB[0],st[0 % kNumSMs]);
+	Xor(zero[0],zero[0],zero[0],st[0 % kNumSMs]);
+	Synchronize();
+
+//	for(int i=0; i<oBits; i++){
+//		Copy(empty[i],zero[0]);
+//	}
+
+	for(int i=0; i<oBits; i++){
+		Copy(tempSum[i],zero[0]);
+		Copy(tempSum2[i],zero[0]);
+	};
+
+	int co=0;
+	int counter=0;
+
+	Synchronize();
+
+
+	for(int i = iBits-1; i > -1; i--) {
+
+		co=0;
+		co=counter;
+
+
+
+		Ctxt* andResLeft = new Ctxt[oBits];
+		//initalize nresleft to be 'nothing'
+		for(int i=0; i<oBits; i++){
+			Copy(andResLeft[i],zero[0]);
+		}
+
+
+		for(int j = 0; j < iBits; j++) {
+			And(andRes[j], ctA[oBits-1-j], ctB[oBits-1-counter], st[j % kNumSMs]);
+		}
+		Synchronize();
+
+		//cout << "\nCO\n";
+		for(int j = 0; j < iBits; j++) {
+			//cout << oBits-1-co;
+			Copy(andResLeft[oBits-1-co], andRes[j]);
+			co++;
+		}
+
+		Synchronize();
+
+		
+
+                if(counter==0) {
+
+			addNumbers(tempSum, andResLeft, tempSum2, oBits);
+			Synchronize();
+		} else {
+			addNumbers(tempSum, andResLeft, tempSum, oBits);
+			Synchronize();
+		}
+
+
+		delete [] andResLeft;
+		counter++;
+
+	}
+
+	for(int i=0; i < oBits; i ++) {
+                Copy(ctRes[i], tempSum[i]);
+        }
+	Synchronize();
+	for (int i = 0; i < kNumSMs; i ++)
+		st[i].Destroy();
+	delete [] st;
+	delete [] tempSum;
+	delete [] andRes;
+}
 
 
 
@@ -134,7 +278,7 @@ class Server_socket{
             set_listen_set();
             accept_connection();
 
-            file.open("overall", ios::in | ios::binary);
+            file.open("cipherRes/overall", ios::in | ios::binary);
             if(file.is_open()){
                 cout<<"[LOG] : File is ready to Transmit.\n";
             }
@@ -150,7 +294,10 @@ class Server_socket{
                 exit(EXIT_FAILURE);
             }
             cout<<"[LOG] : Socket Created Successfully.\n";
-        }
+	    const int enable = 1;
+            if (setsockopt(general_socket_descriptor, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+                   perror("setsockopt(SO_REUSEADDR) failed");
+            }  
 
         void bind_socket(){
             if (bind(general_socket_descriptor, (struct sockaddr *)&address, sizeof(address))!=0) {
@@ -198,20 +345,40 @@ class Server_socket{
             int count = 0;
 	    std::ifstream file("cipher/overall");
 
-	    std::string filenames[64];
+	    //last one will be for publickey
+	    std::string filenames[65];
             for (int i = 0; i < 64; i ++){
-                string filename = "ct" + std::to_string(i);
+                string filename = "cipher/ct" + std::to_string(i);
+		remove(filename.c_str());
 		filenames[i] = filename;
 	    };
+/*
+	    filenames[64]="finalkeys/publickey1.txt";
+	    remove("finalkeys/publickey1.txt");
+*/
 
 	    if (file.is_open()) {
     	 	std::string line;
     		while (std::getline(file, line)) {
-		      int fileChoice = floor(count/501);
-	              ofstream Myfile;
-		      Myfile.open(filenames[fileChoice], fstream::app);
-		      Myfile << line.c_str() << endl;
-		      count += 1;
+                      if( line.length() == 1){
+		           ofstream File;
+			   File.open("operator.txt", fstream::app);
+			   File << line.c_str() << endl;
+			   cout << "\n Reading from file is: " << line.c_str() << "\n";
+		      } else {
+//		           if(count==(501*64)){
+//	    	      		ofstream pubkey;
+ //                    		pubkey.open("finalkeys/publickey1.txt",fstream::app);
+//	              		pubkey << line.c_str() << endl;
+//		           } else {
+		      		int fileChoice = floor(count/501);
+	              		ofstream Myfile;
+		      		Myfile.open(filenames[fileChoice], fstream::app);
+		      		Myfile << line.c_str() << endl;
+		      		count += 1;
+//			   }
+		      }
+
 	        };
 	     };
         };
@@ -237,8 +404,8 @@ class Server_socket{
 		    printf("%d",valread);
 		    if(valread == 0)
 			    break;
-		    printf("%s", buffer);
-		    file2<<buffer;
+                    printf("%s", buffer);
+ 		    file2<<buffer;
 		    bzero(buffer, sizeof(buffer));
 	    };
             cout<<"[LOG] : Saving data to file.\n";
@@ -265,10 +432,7 @@ int main() {
 
   //SetSeed(); // set random seed
 
-  PriKey pri_key; // public key
-  PubKey pub_key;
-
-  ReadPubKeyFromFile(pub_key,"finalkeys/publickey1.txt");
+  remove("operator.txt");
   remove("cipher/overall");
 
   Ptxt* pt = new Ptxt[numBits];
@@ -281,25 +445,32 @@ int main() {
   bool correct;
   correct = true;
 
+  //RECEIVE DATA FROM CLIENT!
+  Server_socket S;
+  S.start_everything(port1);
+  S.receive_file();
+  S.split_file();
+
+
+
+  PubKey pub_key;
+  ReadPubKeyFromFile(pub_key,"finalkeys/publickey1.txt");
+
   cout<< "------ Initilizating Data on GPU(s) ------" <<endl;
   Initialize(pub_key); // essential for GPU computing
 
 
 
-  //RECEIVE DATA FROM CLIENT!
-  Server_socket S;
-  S.start_everything(port1);
-  S.transmit_file();
-  S.close_socket();
-  return 0;
 
 
   for (int i = 0; i < numBits; i ++) {
 	  ReadCtxtFromFile(ct[i],"cipher/ct"+std::to_string(i));
   }
 
-  for (int i = 32; i < numBits; i ++) {
-	  ReadCtxtFromFile(ct1[i],"cipher/ct"+std::to_string(i));
+  int countCT=0;
+  for (int i = 32; i < numBits + numBits; i ++) {
+	  ReadCtxtFromFile(ct1[countCT],"cipher/ct"+std::to_string(i));
+	  countCT++;
   }
 
 
@@ -322,17 +493,88 @@ int main() {
   cudaEventCreate(&stop);
   cudaEventRecord(start, 0);
 
-
-  // Here, pass streams to gates for parallel gates.
-  cout<< "------ Test NAND Gate ------" <<endl;
-  for (int i = 0; i < numBits; i ++) {
-    Nand(ctRes[i], ct[i], ct1[i], st[i % kNumSMs]);
-  }
-
+  Ctxt* zero = new Ctxt[32];
+  Ctxt* temp = new Ctxt[32];
+  And(zero[31],ct[0],ct1[0],st[0 % kNumSMs]);
+  Xor(zero[31],zero[0],zero[0],st[0 % kNumSMs]);
   Synchronize();
 
+  Ctxt* one = new Ctxt[1];
+  Not(one[0], zero[31]);
+
+  for ( int i = 0; i < 31; i++ ){
+    Copy(zero[i], one[0]);
+  };
+
+  std::string operator_code;
+  ifstream MyReadFile("operator.txt");
+  std::string myText;
+  while (getline (MyReadFile, myText)) {
+     operator_code = myText;
+  }
+  MyReadFile.close(); 
+  
+  cout << "\n The operator code is: " << operator_code << "\n";
+
+  if (operator_code == "0" ){
+      addNumbers(ctRes, ct, ct1, 32);
+  } else if ( operator_code == "1"){
+
+      subNumbers(ctRes, ct, ct1, 32);
+  } else if ( operator_code == "2"){
+      subNumbers(ctRes, ct1, ct, 32);
+  } else if ( operator_code == "3"){
+      addNumbers(ctRes, ct, ct1, 32);
+      for ( int i = 0; i < 32; i++ ){
+	    Not(temp[i], ctRes[i]);
+      };
+      Synchronize();
+
+      addNumbers(ctRes, zero, temp, 32);
+
+      Not(ctRes[0], ctRes[0]);
+
+  } else if ( operator_code == "4"){
+      mulNumbers(ctRes, ct, ct1, (32/2), 32);
+  } else if ( operator_code == "5"){
+      
+      mulNumbers(ctRes, ct, ct1, (32/2), 32);
+
+      for ( int i = 0; i < 32; i++ ){
+             Not(temp[i], ctRes[i]);
+      };
+
+      Synchronize();
+
+      for ( int i = 0; i < 32; i ++) {
+	      Copy(ctRes[i], temp[i]);
+      }
+
+      addNumbers(ctRes, zero, temp, 32);
+
+      Not(ctRes[0], ctRes[0]);
+/*
+      for ( int i = 0; i < 32; i ++ ){
+	      Copy(ctRes[i], zero[i]); 
+      }
+*/
+  };
+  
+  Synchronize();
+  cudaEventRecord(stop, 0);
+  cudaEventSynchronize(stop);
+  cudaEventElapsedTime(&et, start, stop);
+  cout<< et / kNumLevels << " ms for addition" <<endl;
+  cudaEventDestroy(start);
+  cudaEventDestroy(stop);
+
+
+  string fname;
+  remove("cipherRes/overall");
   for (int i = 0; i < numBits; i ++) {
-	  WriteCtxtToFile(ctRes[i],"cipherRes/ct"+std::to_string(i));
+	  fname = "cipherRes/ct"+std::to_string(i);
+	  remove(fname.c_str());
+	  WriteCtxtToFile(ctRes[i],fname);
   }
   
   //only 32 files for cipheres
@@ -342,8 +584,9 @@ int main() {
             of_c << if_a.rdbuf();
   }
 
-
-  
+  Server_socket S1;
+  S1.start_everything(port2);
+  S1.transmit_file();
 
   for (int i = 0; i < kNumSMs; i ++)
     st[i].Destroy();

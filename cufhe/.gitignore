@@ -7,3 +7,7 @@ privatekey1.txt
 *.o
 prove/test_api_gpu
 newclient
+prove/cipher1**
+prove/cipher**
+prove/cipherRes**
+overall
