@@ -2,6 +2,13 @@
 cd /root/cuFHE/cufhe/
 make
 
+dire="prove"
+nvcc -c $dire/newclient.cu
+nvcc -std=c++11 -O3 -w  -I./ -M -o $dire/test_api_gpu.d $dire/newclient.cu
+nvcc -std=c++11 -O3 -w  -I./ -c -o $dire/newclient.o $dire/newclient.cu
+nvcc -std=c++11 -O3 -w  -o $dire/newclient $dire/newclient.o -Lbin -lcufhe_gpu
+exit
+
 dire="Client1"
 nvcc -c $dire/client1.cu
 nvcc -std=c++11 -O3 -w  -I./ -M -o $dire/test_api_gpu.d $dire/client1.cu

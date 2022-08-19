@@ -14,6 +14,8 @@
 #include <netinet/in.h>
 
 #include <ios>
+
+  
 #include <include/cufhe_gpu.cuh>
 using namespace cufhe;
 
@@ -33,11 +35,8 @@ class Client_socket{
     int address_length;
 
     public:
-        Client_socket(){
-	
-	};
 
-        void start_everything(int number, string role){
+            void start_everything(int number, string role){
             create_socket();
             PORT = number;
 
@@ -48,8 +47,8 @@ class Client_socket{
             address_length = sizeof(address);
 
             if ( role == "server" ){
-
-                address.sin_addr.s_addr = INADDR_ANY;
+                
+	        address.sin_addr.s_addr = INADDR_ANY;
                 bind_socket();
                 set_listen_set();
                 accept_connection();
@@ -104,16 +103,18 @@ class Client_socket{
                 exit(EXIT_FAILURE);
             }
             cout<<"[LOG] : Socket Created Successfully.\n";
-            const int enable = 1;
+	    const int enable = 1;
             if (setsockopt(general_socket_descriptor, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
                    perror("setsockopt(SO_REUSEADDR) failed");
 
-	}
+        }
 
         void create_connection(){
             if (connect(general_socket_descriptor, (struct sockaddr *)&address, sizeof(address)) < 0) { 
+                //perror("[ERROR] : connection attempt failed.\n");
 		sleep(10);
             	create_connection();
+                //exit(EXIT_FAILURE);
             } else {
             	cout<<"[LOG] : Connection Successfull.\n";
             }
@@ -129,7 +130,7 @@ class Client_socket{
 	    fstream file2;
             
             printf("============================\n");	    
-	    file2.open("operator.txt", ios::in | ios::binary);
+	    file2.open("cipher/overall", ios::in | ios::binary);
             if(file2.is_open()){
                 cout<<"[LOG] : Send File is ready to Transmit.\n";
             }
@@ -150,75 +151,41 @@ class Client_socket{
             cout<<"[LOG] : File Transfer Complete.\n";	
 	}
 
-        void receive_file(int recvKey){
-	    
+	    void receive_file(){
+
+            remove("finalkeys/privatekey1.txt");
+
             fstream file2;
 
-	    if(recvKey==1) {
-		    
-		remove("finalkeys/privatekey1.txt");
-                file2.open("finalkeys/privatekey1.txt", ios::out | ios::trunc | ios::binary);
-		    
-	    } else {
-		   
-		remove("cipher/overall");
-            	file2.open("cipher/overall", ios::out | ios::trunc | ios::binary);
-	    }
-	    
-            if(file2.is_open()){
-               	 cout<<"[LOG] : Return File Creted.\n";
-            } else{
+            file2.open("finalkeys/privatekey1.txt", ios::out | ios::trunc | ios::binary);
+            	if(file2.is_open()){
+                	cout<<"[LOG] : Return File Creted.\n";
+            }
+            else{
                 cout<<"[ERROR] : File creation failed, Exititng.\n";
                 exit(EXIT_FAILURE);
             }
 
             char buffer[2200024] = {};
             bzero(buffer, sizeof(buffer));
-            //int count = 0;
             printf("Starting to download file contents");
             while(1){
-                   int valread = read(general_socket_descriptor , buffer, 2200024);
-                   printf("%d",valread);
-                   if(valread == 0)
+                    printf("Beginning file contents");
+                    int valread = read(general_socket_descriptor , buffer, 2200024);
+                    printf("%d",valread);
+                    if(valread == 0)
                             break;
-                   printf("%s", buffer);
-                   file2<<buffer;
-                   bzero(buffer, sizeof(buffer));
+                    printf("%s", buffer);
+                    file2<<buffer;
+                    bzero(buffer, sizeof(buffer));
             };
             cout<<"[LOG] : Saving data to file.\n";
             cout<<"[LOG] : File Saved.\n";
             file2.close();
-	    
 
-        };
-
-
-	void split_file(int numBits){
-            int count = 0;
-            std::ifstream file("cipher/overall");
-
-            std::string filenames[numBits];
-            for (int i = 0; i < numBits; i ++){
-                string filename = "cipherRes/ct" + std::to_string(i);
-                remove(filename.c_str());
-                filenames[i] = filename;
             };
-
-            if (file.is_open()) {
-                std::string line;
-                while (std::getline(file, line)) {
-                               int fileChoice = floor(count/501);
-                               ofstream Myfile;
-                               Myfile.open(filenames[fileChoice], fstream::app);
-                               Myfile << line.c_str() << endl;
-                               count += 1;
-	
-                };
-             };
-        };
-
-
 };
+
 
 // function to convert decimal to binary
 std::string decToBinary(int n)
@@ -236,48 +203,15 @@ std::string binToDecimal(string s)
     return str;
 }
 
-//addition
-string add(string a, string b){
-   string result = "";
-   int temp = 0;
-   int size_a = a.size() - 1;
-   int size_b = b.size() - 1;
-   while (size_a >= 0 || size_b >= 0 || temp == 1){
-      temp += ((size_a >= 0)? a[size_a] - '0': 0);
-      temp += ((size_b >= 0)? b[size_b] - '0': 0);
-      result = char(temp % 2 + '0') + result;
-      temp /= 2;
-      size_a--; size_b--;
-   }
-   return result;
-}
-
-// function to convert to Two's Complement
-std::string toTwoComplement(string s) {
-
-  int size = s.length();
-
-  char binary[size + 1], one[size + 1];
-  int i;
-
-  strcpy(binary, s.c_str());
-
-  for (i = 0; i < size; i++) {
-    if (binary[i] == '1') {
-      one[i] = '0';
-    } else if (binary[i] == '0') {
-      one[i] = '1';
+std::string addZeros(string b, int bits){
+    for ( int i = b.length(); i < bits; i++ ){
+	 b = "0" + b;
     }
-  }
-  one[size] = '\0';
-
-  return add(one,"1");
-}
+    return b;
+};
 
 int main(int argc, char const* argv[])
 {
-    int port1 = 4380;
-    struct sockaddr_in;
 
     // Generating CT
 
@@ -285,120 +219,119 @@ int main(int argc, char const* argv[])
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, 0);
     uint32_t kNumSMs = prop.multiProcessorCount;
-    //uint32_t kNumLevels = 4;
     int numBits = 32;
 
     SetSeed();
+
+    // Get Private Key from Key Generation
+    Client_socket K;
+    K.start_everything(4384, "server");
+    K.receive_file();
+    K.close_socket();
+
+    PriKey pri_key; // private key
+
+    struct timeval start, end;
+    double get_time;
+
+
+    ReadPriKeyFromFile(pri_key,"finalkeys/privatekey1.txt");
 
 
     Stream* st = new Stream[kNumSMs];
     for (int i = 0; i < kNumSMs; i ++)
       st[i].Create();
 
-   // Getting the User Inputs
-   int operator_code;
+   // Getting the User Inputs ========================
+   int input1, operator_code;
    string sign;
-   char input1;
 
-   cout << "What is your number of Bits?: ";
-   std::cin >> numBits;
+   // Get inputs
+   cout << "How many bits do you want: ";
+   cin >> numBits;
+   
+   cout << "What is your first number: ";
+   cin >> input1;
 
-
+   
     Ptxt* pt = new Ptxt[numBits];
     Ptxt* pt1 = new Ptxt[numBits];
     Ptxt* ptRes = new Ptxt[numBits];
     Ctxt* ct = new Ctxt[numBits];
     Ctxt* ct1 = new Ctxt[numBits];
     Ctxt* ctRes = new Ctxt[numBits];
-
-   cout << "What is your operator: ";
-   cin >> input1;
-
-
-   if (input1 == '+'){
-       operator_code = 1;
-   } else if (input1 == '-') {
-       operator_code = 2;
+   if ( input1 < 0 ){
+	   operator_code = 2;
    } else {
-       operator_code = 3;
+	   operator_code = 1;
+   }
+
+   // Conver Decimal to Binary
+   string x;
+
+   x = decToBinary(input1);
+
+   // Add the missing zeros
+   x = addZeros(x ,numBits);
+
+   for ( int i = 0; i < numBits; i++){
+       pt[i] = x[i];
    }
 
    cout << "\nThe operator code is: " << operator_code << "\n";
     
-   Synchronize();
-
-   //-----------------------SENDING DATA OVER----------------------------
-
-   remove("operator.txt");
-
-   // Write Operator Code
-   ofstream myfile;
-   myfile.open ("operator.txt");
-   myfile << operator_code << "\n";
-   myfile.close();
-    
-
-   //Send Operator Code to Server
-   Client_socket C;
-   C.start_everything(port1, "client");
-   C.transmit_file();
-   C.close_socket();
-
-
-   //-------------------READING BACK DATA FROM SERVER----------------------//
-
-   // Get Private Key from Key Generation
-   Client_socket K;
-   K.start_everything(4382, "server");
-   K.receive_file(1);
-   K.close_socket();
-   PriKey pri_key;
-   ReadPriKeyFromFile(pri_key,"finalkeys/privatekey1.txt");
-
-
-   //Receive Encrypted Data from Server after is computes
-   Client_socket S1;
-   S1.start_everything(4388, "server");
-   S1.receive_file(0);
-   S1.split_file(numBits);
-   S1.close_socket();
-
    for (int i = 0; i < numBits; i ++) {
-           string filename = "cipherRes/ct" + std::to_string(i);
-           ReadCtxtFromFile(ctRes[i],filename);
-   }
+   	Encrypt(ct[i], pt[i], pri_key);
+    }
 
-   //Decrypt Data
-   for (int i = 0; i < numBits; i ++) {
-     Decrypt(ptRes[i], ctRes[i], pri_key);
-   }
+    Synchronize();
+
+    //-----------------------SENDING DATA OVER----------------------------
+
+    //DUMP CTXT FILES TO SEND
+    for (int i = 0; i < numBits; i ++) {
+	    string filename = "cipher/ct" + std::to_string(i);
+	    WriteCtxtToFile(ct[i],filename);
+    }
+
+    remove("cipher/overall");
+
+    // Write Operator Code
+    ofstream myfile;
+    myfile.open ("cipher/overall");
+    myfile << operator_code << "\n";
+    myfile.close();
 
     
-   std::string result;
-   //Print out result
-   cout << "\nRESULT:\n";
-   for (int i=0; i < numBits; i++) {
-	   result = result + std::to_string(ptRes[i].message_);
-   }
-
-   cout << "\n The result is : " << result;
-   if(result[0] == '1'){
-	result = toTwoComplement(result);
-	result = "-" + binToDecimal(result);
-   } else {
-       result = binToDecimal(result);
-   };
-
-   cout << "\n The result is: " << result;
+    for (int i = 0; i < numBits; i ++) {
+	    std::ifstream if_a("cipher/ct"+std::to_string(i),std::ios_base::app);
+	    std::ofstream of_c("cipher/overall",std::ios_base::app);
+	    of_c << if_a.rdbuf();
+    }
     
-   for (int i = 0; i < kNumSMs; i ++)
+    gettimeofday(&start, NULL);
+    
+    // SEND INPUT AND OPERATOR CODE TO SERVER
+    Client_socket C;
+    C.start_everything(4386, "client");
+    C.transmit_file();
+    C.close_socket();
+
+    gettimeofday(&end, NULL);
+    get_time = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) * 1.0E-6;
+    printf("Time taken to send: %lf[sec]\n", get_time);
+
+    gettimeofday(&start, NULL);
+
+    for (int i = 0; i < kNumSMs; i ++)
       st[i].Destroy();
 
-   delete [] st;
+    delete [] st;
 
-   cout<< "\n------ Cleaning Data on GPU ------\n";
-   CleanUp(); // essential to clean and deallocate data
-   delete [] ct;
-   delete [] pt;
-   return 0;
+    cout<< "\n------ Cleaning Data on GPU(s) ------" <<endl;
+    CleanUp(); // essential to clean and deallocate data
+    delete [] ct;
+    delete [] pt;
+    return 0;
 }
+

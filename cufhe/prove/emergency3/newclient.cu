@@ -193,12 +193,12 @@ class Client_socket{
         };
 
 
-	void split_file(int numBits){
+	void split_file(){
             int count = 0;
             std::ifstream file("cipher/overall");
 
-            std::string filenames[numBits];
-            for (int i = 0; i < numBits; i ++){
+            std::string filenames[32];
+            for (int i = 0; i < 32; i ++){
                 string filename = "cipherRes/ct" + std::to_string(i);
                 remove(filename.c_str());
                 filenames[i] = filename;
@@ -290,6 +290,12 @@ int main(int argc, char const* argv[])
 
     SetSeed();
 
+    Ptxt* pt = new Ptxt[numBits];
+    Ptxt* pt1 = new Ptxt[numBits];
+    Ptxt* ptRes = new Ptxt[numBits];
+    Ctxt* ct = new Ctxt[numBits];
+    Ctxt* ct1 = new Ctxt[numBits];
+    Ctxt* ctRes = new Ctxt[numBits];
 
     Stream* st = new Stream[kNumSMs];
     for (int i = 0; i < kNumSMs; i ++)
@@ -299,17 +305,6 @@ int main(int argc, char const* argv[])
    int operator_code;
    string sign;
    char input1;
-
-   cout << "What is your number of Bits?: ";
-   std::cin >> numBits;
-
-
-    Ptxt* pt = new Ptxt[numBits];
-    Ptxt* pt1 = new Ptxt[numBits];
-    Ptxt* ptRes = new Ptxt[numBits];
-    Ctxt* ct = new Ctxt[numBits];
-    Ctxt* ct1 = new Ctxt[numBits];
-    Ctxt* ctRes = new Ctxt[numBits];
 
    cout << "What is your operator: ";
    cin >> input1;
@@ -360,7 +355,7 @@ int main(int argc, char const* argv[])
    Client_socket S1;
    S1.start_everything(4388, "server");
    S1.receive_file(0);
-   S1.split_file(numBits);
+   S1.split_file();
    S1.close_socket();
 
    for (int i = 0; i < numBits; i ++) {
