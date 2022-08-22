@@ -291,7 +291,7 @@ class Server_socket{
             cout << "\nI am transmitting : " << filename << "\n";
             file.open(filename, ios::in | ios::binary);
             if(file.is_open()){
-                cout<<"[LOG] : File Creted.\n";
+                cout<<"[LOG] : File Created.\n";
             }
             else{
                 cout<<"[ERROR] : File creation failed, Exititng.\n";
@@ -573,7 +573,7 @@ int main() {
   cudaEventRecord(stop, 0);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&et, start, stop);
-  cout<< et / kNumLevels << " ms for addition" <<endl;
+  cout<< et / kNumLevels << " ms to calculate" <<endl;
   cudaEventDestroy(start);
   cudaEventDestroy(stop);
 

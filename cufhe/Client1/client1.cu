@@ -63,7 +63,7 @@ class Client_socket{
 
                 file.open("rec.txt", ios::out | ios::trunc | ios::binary);
                 if(file.is_open()){
-                        cout<<"[LOG] : File Creted.\n";
+                        cout<<"[LOG] : File Created.\n";
                 }
                 else{
                         cout<<"[ERROR] : File creation failed, Exititng.\n";
@@ -237,28 +237,29 @@ int main(int argc, char const* argv[])
 
     ReadPriKeyFromFile(pri_key,"finalkeys/privatekey1.txt");
 
-    Ptxt* pt = new Ptxt[numBits];
-    Ptxt* pt1 = new Ptxt[numBits];
-    Ptxt* ptRes = new Ptxt[numBits];
-    Ctxt* ct = new Ctxt[numBits];
-    Ctxt* ct1 = new Ctxt[numBits];
-    Ctxt* ctRes = new Ctxt[numBits];
 
     Stream* st = new Stream[kNumSMs];
     for (int i = 0; i < kNumSMs; i ++)
       st[i].Create();
 
    // Getting the User Inputs ========================
-   int input1, operator_code, bits;
+   int input1, operator_code;
    string sign;
 
    // Get inputs
    cout << "How many bits do you want: ";
-   cin >> bits;
+   cin >> numBits;
    
    cout << "What is your first number: ";
    cin >> input1;
 
+   
+    Ptxt* pt = new Ptxt[numBits];
+    Ptxt* pt1 = new Ptxt[numBits];
+    Ptxt* ptRes = new Ptxt[numBits];
+    Ctxt* ct = new Ctxt[numBits];
+    Ctxt* ct1 = new Ctxt[numBits];
+    Ctxt* ctRes = new Ctxt[numBits];
    if ( input1 < 0 ){
 	   operator_code = 2;
    } else {
@@ -271,7 +272,7 @@ int main(int argc, char const* argv[])
    x = decToBinary(input1);
 
    // Add the missing zeros
-   x = addZeros(x ,bits);
+   x = addZeros(x ,numBits);
 
    for ( int i = 0; i < numBits; i++){
        pt[i] = x[i];

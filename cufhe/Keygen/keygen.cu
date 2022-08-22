@@ -64,7 +64,7 @@ class Client_socket{
             	file.open("rec.txt", ios::out | ios::trunc | ios::binary);
             	
 		if(file.is_open()){
-                	cout<<"[LOG] : File Creted.\n";
+                	cout<<"[LOG] : File Created.\n";
             	}
 
             	else{
