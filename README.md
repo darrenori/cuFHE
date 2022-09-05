@@ -17,6 +17,10 @@ This "Makefile" is created for Linux systems. Please create your own Makefile fo
 GPU support requires NVIDIA Driver, NVIDIA CUDA Toolkit and a GPU with **Compute Capability no less than 6.0**.
 For devices with Compute Capability less than 6.0, there is [an issue](https://github.com/vernamlab/cuFHE/issues/2) that have not been solved yet. Any fix or suggestion is welcomed.
 
+
+### Our Implementation (Darren & Russell)
+Our implementation requires the use of KeyGen, Client1, Client2, Server, and Verif. Simply run the make command to compile the relevant files. We have used the topology shown in `doc` and transferred relevant files using sockets from ports 4380-488. Operators +, -, x that were created using arithmetic gates can be found in newserver.cu
+
 ### Installation (Linux)
 - Run `make` from the directory `cufhe/` for default compilation. This will
   1. create directories `build` and `bin`,
@@ -31,6 +35,7 @@ For devices with Compute Capability less than 6.0, there is [an issue](https://g
   3. to change the Makefile if your python and boost include/lib paths are different than default,
   4. to run `make python_cpu` for CPU library and `make python_gpu` for GPU library, and finally
   5. to test the python scripts under `cufhe/python/`.
+  6.
 
 ### User Manual
 Use files in `cufhe/test/` as examples. To summarize, follow the following function calling procedures.
