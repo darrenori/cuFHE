@@ -19,7 +19,7 @@ For devices with Compute Capability less than 6.0, there is [an issue](https://g
 
 
 ### Our Implementation (Darren & Russell)
-Our implementation requires the use of KeyGen, Client1, Client2, Server, and Verif. Simply run the make command to compile the relevant files. We have used the topology shown in `doc` and transferred relevant files using sockets from ports 4380-488. Operators +, -, x that were created using arithmetic gates can be found in newserver.cu
+Our implementation requires the use of KeyGen, Client1, Client2, Server, and Verif. Simply run the make command to compile the relevant files. We have used the topology shown in `doc` and transferred relevant files using sockets from ports 4380-488. Operators +, -, x that were created using arithmetic gates can be found in `newserver.cu`.
 
 ### Installation (Linux)
 - Run `make` from the directory `cufhe/` for default compilation. This will
