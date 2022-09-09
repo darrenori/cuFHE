@@ -19,7 +19,17 @@ For devices with Compute Capability less than 6.0, there is [an issue](https://g
 
 
 ### Our Implementation (Darren & Russell)
-Our implementation requires the use of KeyGen, Client1, Client2, Server, and Verif. Simply run the make command to compile the relevant files. We have used the topology shown in `doc` and transferred relevant files using sockets from ports 4380-488. Operators +, -, x that were created using arithmetic gates can be found in `newserver.cu`.
+Our implementation requires the use of KeyGen, Client1, Client2, Server, and Verif. Simply run the `script.sh` file to compile all relevant files. We have used the topology shown in `doc` and transferred relevant files using sockets from ports 4380-488. Operators +, -, x that were created using arithmetic gates can be found in `newserver.cu`. IP addresses have been set statically and can be changed be the user. 
+
+For more details, do look in `doc` for a detailed explanation and analysis of CuFHE utilising Addition, Subtraction, and Multiplication.
+
+
+### Subnet
+Server: 69.69.69.1
+Verif: 69.69.69.2
+Client1: 69.69.69.3
+Client2: 69.69.69.4
+KeyGen: 69.69.69.5
 
 ### Installation (Linux)
 - Run `make` from the directory `cufhe/` for default compilation. This will
