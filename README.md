@@ -35,7 +35,6 @@ Our implementation requires the use of KeyGen, Client1, Client2, Server, and Ver
   3. to change the Makefile if your python and boost include/lib paths are different than default,
   4. to run `make python_cpu` for CPU library and `make python_gpu` for GPU library, and finally
   5. to test the python scripts under `cufhe/python/`.
-  6.
 
 ### User Manual
 Use files in `cufhe/test/` as examples. To summarize, follow the following function calling procedures.
