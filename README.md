@@ -24,19 +24,20 @@ Our implementation requires the use of KeyGen, Client1, Client2, Server, and Ver
 For more details, do look in `doc` for a detailed explanation and analysis of CuFHE utilising Addition, Subtraction, and Multiplication.
 
 
-### Subnet
-1. Server: 69.69.69.1
-2. Verif: 69.69.69.2
-3. Client1: 69.69.69.3
-4. Client2: 69.69.69.4
-5. KeyGen: 69.69.69.5
+#### Subnet
+  1. Server: 69.69.69.1
+  2. Verif: 69.69.69.2
+  3. Client1: 69.69.69.3
+  4. Client2: 69.69.69.4
+  5. KeyGen: 69.69.69.5
 
 
 ### Installation (Linux)
 - Run `make` from the directory `cufhe/` for default compilation. This will
-  1. create directories `build` and `bin`,
-  2. generate shared libraries `libcufhe_cpu.so` (CPU standalone),
-  3. `libcufhe_gpu.so` (GPU support) in `bin` directory, and 3) create test and benchmarking executables `test_api_cpu` and `test_api_gpu` in `bin`.
+  1. Set static IP addresses according to `Subnet`
+  2. create directories `build` and `bin`,
+  3. generate shared libraries `libcufhe_cpu.so` (CPU standalone),
+  4. `libcufhe_gpu.so` (GPU support) in `bin` directory, and 3) create test and benchmarking executables `test_api_cpu` and `test_api_gpu` in `bin`.
 
 - Alternatively, run `make cpu` or `make gpu` for individual library and executable.
 - Copy the library files and `include` folder to any desirable location. Remember to export your library directory with `export LD_LIBRARY_PATH=directory`. Run `test_api_gpu` to see the latency per gate.
