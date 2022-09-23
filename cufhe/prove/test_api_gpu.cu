@@ -65,6 +65,7 @@ void CopyCheck(Ptxt& out, const Ptxt& in){
 	out.message_ = in.message_;
 }
 
+
 void addBits(Ctxt *r, Ctxt &a, Ctxt &b, Ctxt *carry) {
 	Ctxt *t1 = new Ctxt[1];
     Ctxt *t2 = new Ctxt[1];
@@ -85,29 +86,29 @@ void addNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int nBits) {
 	Ctxt *carry = new Ctxt[1];
         Ctxt *bitResult = new Ctxt[2];
 
-	Xor(ctRes[31], ctA[31], ctB[31]);
-	And(carry[0], ctA[31], ctB[31]);
+	Xor(ctRes[nBits-1], ctA[nBits-1], ctB[nBits-1]);
+	And(carry[0], ctA[nBits-1], ctB[nBits-1]);
 	Synchronize();
-	for(int i = 30; i > 0; i--) {
+	for(int i = nBits-2; i > 0; i--) {
 		addBits(bitResult, ctA[i], ctB[i], carry);
 		Copy(ctRes[i], bitResult[0]);
 		Copy(carry[0], bitResult[1]);
 		Synchronize();
 	}
 	Copy(ctRes[0], carry[0]);
-	//Copy(ctRes[nBits-1],carry[0]);
-
 	Synchronize();
 	delete [] carry;
 	delete [] bitResult;
 }
+
+
 
 void twoComplements(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, Ctxt *minusEnd, int nBits){
              
 	    Ctxt *twoRes = new Ctxt[nBits];
 	
 	    // Inverse B
-            for(int i = 0; i < 32; i++){
+            for(int i = 0; i < nBits; i++){
                 Not(ctB[i], ctB[i]);
             }
  
@@ -125,23 +126,14 @@ void twoComplements(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, Ctxt *minusEnd, int nBits
 
 };
 
-void testing(Ctxt *ctRes, Ctxt *test){
-	for ( int i = 0; i < 32; i++){
-		Copy(ctRes[i], test[i]);
-	};
-};
-
 void subNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int nBits) {
-
-        // This equation will have ctB to ALWAYS be negative and ctA ALWAYS postive
-	
 	Ctxt *minusEnd = new Ctxt[nBits];
 	
-	for(int i = 0; i < 32; i ++){
+	for(int i = 0; i < nBits; i ++){
 	    Copy(minusEnd[i], ctA[0]);
 	};
 
-	Not(minusEnd[31], minusEnd[31]);
+	Not(minusEnd[nBits-1], minusEnd[nBits-1]);
 
         twoComplements(ctRes, ctA, ctB, minusEnd, nBits);
 
@@ -149,7 +141,6 @@ void subNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int nBits) {
 };
 
 void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
-
 	cudaDeviceProp prop;
 	cudaGetDeviceProperties(&prop, 0);
 	uint32_t kNumSMs = prop.multiProcessorCount;
@@ -169,10 +160,6 @@ void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
 	Xor(zero[0],zero[0],zero[0],st[0 % kNumSMs]);
 	Synchronize();
 
-//	for(int i=0; i<oBits; i++){
-//		Copy(empty[i],zero[0]);
-//	}
-
 	for(int i=0; i<oBits; i++){
 		Copy(tempSum[i],zero[0]);
 		Copy(tempSum2[i],zero[0]);
@@ -180,16 +167,11 @@ void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
 
 	int co=0;
 	int counter=0;
-
 	Synchronize();
 
-
 	for(int i = iBits-1; i > -1; i--) {
-
 		co=0;
 		co=counter;
-
-
 
 		Ctxt* andResLeft = new Ctxt[oBits];
 		//initalize nresleft to be 'nothing'
@@ -197,13 +179,11 @@ void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
 			Copy(andResLeft[i],zero[0]);
 		}
 
-
 		for(int j = 0; j < iBits; j++) {
 			And(andRes[j], ctA[oBits-1-j], ctB[oBits-1-counter], st[j % kNumSMs]);
 		}
 		Synchronize();
 
-		//cout << "\nCO\n";
 		for(int j = 0; j < iBits; j++) {
 			//cout << oBits-1-co;
 			Copy(andResLeft[oBits-1-co], andRes[j]);
@@ -212,10 +192,7 @@ void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
 
 		Synchronize();
 
-		
-
                 if(counter==0) {
-
 			addNumbers(tempSum, andResLeft, tempSum2, oBits);
 			Synchronize();
 		} else {
@@ -223,10 +200,8 @@ void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
 			Synchronize();
 		}
 
-
 		delete [] andResLeft;
 		counter++;
-
 	}
 
 	for(int i=0; i < oBits; i ++) {
@@ -239,6 +214,7 @@ void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
 	delete [] tempSum;
 	delete [] andRes;
 }
+
 
 // function to convert decimal to binary
 std::string decToBinary(int n)
@@ -397,19 +373,19 @@ class Server_socket{
             close(new_socket_descriptor);
 	}
 
-	void split_file(){
+	void split_file(int numBits){
             int count = 0;
 	    std::ifstream file("cipher/overall");
 
 	    //last one will be for publickey
-	    std::string filenames[65];
-            for (int i = 0; i < 64; i ++){
+	    std::string filenames[numBits * 2 + 1];
+            for (int i = 0; i < numBits * 2; i ++){
                 string filename = "cipher/ct" + std::to_string(i);
 		remove(filename.c_str());
 		filenames[i] = filename;
 	    };
 
-	    filenames[64]="finalkeys/publickey1.txt";
+	    filenames[numBits * 2]="finalkeys/publickey1.txt";
 	    remove("finalkeys/publickey1.txt");
 
 
@@ -417,8 +393,8 @@ class Server_socket{
     	 	std::string line;
     		while (std::getline(file, line)) {
 
-		      if(count==(501*64)){
-	    	      	ofstream pubkey;
+		      if(count==(501*(numBits*2))){
+	    	      	ofstream pubkey; 
                       	pubkey.open("finalkeys/publickey1.txt",fstream::app);
 	              	pubkey << line.c_str() << endl;
 
@@ -475,7 +451,7 @@ int main() {
   cudaGetDeviceProperties(&prop, 0);
   uint32_t kNumSMs = prop.multiProcessorCount;
   uint32_t kNumLevels = 4;
-  int numBits = 32;
+  int numBits = 256;
   int port1 = 4380;
   int port2 = 4381;
 
@@ -511,7 +487,7 @@ int main() {
 
 
   // Getting the User Inputs ========================
-   int input1, input2, operator_code, bits;
+   unsigned long long input1, input2, operator_code, bits;
    string sign; 
    bool x_neg = false;
    bool y_neg = false;
@@ -586,7 +562,7 @@ int main() {
    x = addZeros(x ,bits);
    y = addZeros(y, bits);
 
-   for ( int i = 0; i < 32; i++){
+   for ( int i = 0; i < numBits; i++){
        pt[i] = x[i];
        pt1[i] = y[i];
    }
@@ -634,48 +610,48 @@ int main() {
   cudaEventCreate(&stop);
   cudaEventRecord(start, 0);
   
-  Ctxt* zero = new Ctxt[32];
-  Ctxt* temp = new Ctxt[32];
-  And(zero[31],ct[0],ct1[0],st[0 % kNumSMs]);
-  Xor(zero[31],zero[0],zero[0],st[0 % kNumSMs]);
+  Ctxt* zero = new Ctxt[numBits];
+  Ctxt* temp = new Ctxt[numBits];
+  And(zero[numBits - 1],ct[0],ct1[0],st[0 % kNumSMs]);
+  Xor(zero[numBits - 1],zero[0],zero[0],st[0 % kNumSMs]);
   Synchronize();
 
   Ctxt* one = new Ctxt[1];
-  Not(one[0], zero[31]);
+  Not(one[0], zero[numBits - 1]);
 
-  for ( int i = 0; i < 31; i++ ){
+  for ( int i = 0; i < numBits - 1 ; i++ ){
     Copy(zero[i], one[0]);
   };
 
   if (operator_code == 0 ){
-      addNumbers(ctRes, ct, ct1, 32);
+      addNumbers(ctRes, ct, ct1, numBits);
   } else if ( operator_code == 1){
-      subNumbers(ctRes, ct, ct1, 32);
+      subNumbers(ctRes, ct, ct1, numBits);
   } else if ( operator_code == 2){
-      subNumbers(ctRes, ct1, ct, 32);
+      subNumbers(ctRes, ct1, ct, numBits);
   } else if ( operator_code == 3){ 
-      addNumbers(ctRes, ct, ct1, 32);
+      addNumbers(ctRes, ct, ct1, numBits);
 
-      for ( int i = 0; i < 32; i++ ){
+      for ( int i = 0; i < numBits; i++ ){
 	    Not(temp[i], ctRes[i]);
       };
       Synchronize();
 
-      addNumbers(ctRes, zero, temp, 32);
+      addNumbers(ctRes, zero, temp, numBits);
       
       Not(ctRes[0], ctRes[0]);
 
   } else if ( operator_code == 4){
-      mulNumbers(ctRes, ct, ct1, (32/2), 32);
+      mulNumbers(ctRes, ct, ct1, (numBits/2), numBits);
   } else if ( operator_code == 5){
-      mulNumbers(ctRes, ct, ct1, (32/2), 32);
+      mulNumbers(ctRes, ct, ct1, (numBits/2), numBits);
      
-      for ( int i = 0; i < 32; i++ ){
+      for ( int i = 0; i < numBits; i++ ){
              Not(temp[i], ctRes[i]);
       };    
       Synchronize();
 
-      addNumbers(ctRes, zero, temp, 32);
+      addNumbers(ctRes, zero, temp, numBits);
  
       Not(ctRes[0], ctRes[0]);
   };
@@ -746,4 +722,3 @@ int main() {
   delete [] pt;
   return 0;
 }
-
