@@ -155,6 +155,7 @@ void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
 		for(int i=0; i<oBits; i++){
 			Copy(andResLeft[i],zero[0]);
 		}
+		Synchronize();
 
 		for(int j = 0; j < iBits; j++) {
 			And(andRes[j], ctA[oBits-1-j], ctB[oBits-1-counter], st[j % kNumSMs]);
@@ -166,19 +167,18 @@ void mulNumbers(Ctxt *ctRes, Ctxt *ctA, Ctxt *ctB, int iBits, int oBits){
 			Copy(andResLeft[oBits-1-co], andRes[j]);
 			co++;
 		}
-
 		Synchronize();
+
 
                 if(counter==0) {
 			addNumbers(tempSum, andResLeft, tempSum2, oBits);
-			Synchronize();
 		} else {
 			addNumbers(tempSum, andResLeft, tempSum, oBits);
-			Synchronize();
 		}
 
 		delete [] andResLeft;
 		counter++;
+		Synchronize();
 	}
 
 	for(int i=0; i < oBits; i ++) {
@@ -481,7 +481,7 @@ int main() {
   }
 
 
-  cout<< "Number of tests:\t" << numBits <<endl;
+  cout<< "Number of bits:\t" << numBits <<endl;
   // Create CUDA streams for parallel gates.
   Stream* st = new Stream[kNumSMs];
   for (int i = 0; i < kNumSMs; i ++)
@@ -489,11 +489,6 @@ int main() {
 
   Synchronize();
 
-  float et;
-  cudaEvent_t start, stop;
-  cudaEventCreate(&start);
-  cudaEventCreate(&stop);
-  cudaEventRecord(start, 0);
 
   Ctxt* zero = new Ctxt[numBits];
   Ctxt* temp = new Ctxt[numBits];
@@ -528,7 +523,16 @@ int main() {
   cout << "\n Client 2 is " << q;
   MyReadFile.close(); 
 
-   if ( (p=="1" && q=="1" && t=="1") || (p=="1" && q=="2" && t=="2") ){
+  float et;
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+  cudaEventRecord(start, 0);
+  //Copy(ctRes[0], one[0]);
+  //for (int i=0; i < numBits; i++) 
+  	//And(ctRes[i],ct[i],ct1[i],st[i % kNumSMs]);
+  
+  if ( (p=="1" && q=="1" && t=="1") || (p=="1" && q=="2" && t=="2") ){
       cout << "\n Adding x+y \n";
       addNumbers(ctRes, ct, ct1, numBits);
   }  else if ( (p=="1" && q=="1" && t=="2") || (p=="1" && q=="2" && t=="1") ){
@@ -567,7 +571,7 @@ int main() {
       addNumbers(ctRes, zero, temp, numBits);
       Not(ctRes[0], ctRes[0]);
   };
-
+  
 
   Synchronize();
   cudaEventRecord(stop, 0);
