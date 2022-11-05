@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <sys/time.h>
+#include <time.h>
 #include <cmath>
 #include <fstream>
 #include <stdlib.h>
@@ -199,8 +201,23 @@ int main(int argc, char const* argv[]){
     PriKey pri_key; // private key
     PubKey pub_key;
 
+
     //Generate Temporary Keys
+    float et;
+    cudaEvent_t startgen, stop;
+    cudaEventCreate(&startgen);
+    cudaEventCreate(&stop);
+    cudaEventRecord(startgen, 0);
+
     KeyGen(pub_key, pri_key);
+
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&et, startgen, stop);
+    cout<< et << " ms to generate keys" <<endl;
+    cudaEventDestroy(startgen);
+    cudaEventDestroy(stop);
+
 
     //Write Keys to file
     WritePubKeyToFile(pub_key,"finalkeys/publickey1.txt");
@@ -213,6 +230,9 @@ int main(int argc, char const* argv[]){
     C0.receive_file();
 
     //Send Private key to verif
+    struct timeval start, end;
+    double get_time;
+    gettimeofday(&start, NULL);
     remove("keys");
     std::ifstream if_a("finalkeys/privatekey1.txt",std::ios_base::app);
     std::ofstream of_c("keys",std::ios_base::app);
@@ -221,9 +241,21 @@ int main(int argc, char const* argv[]){
     cout << ("\n----Sending to verif----\n");
     Client_socket C;
     C.start_everything(4382,0, "client");
+    
+
     C.transmit_file();
+    
+    gettimeofday(&end, NULL);
+    get_time = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) * 1.0E-6;
+    printf("Time taken to send private key: %lf[sec]\n", get_time);
+    gettimeofday(&start, NULL);
+
 
     //Send Public key to server
+    struct timeval startpub, endpub;
+    double get_timepub;
+    gettimeofday(&startpub, NULL);
+
     remove("keys");
     std::ifstream if_a1("finalkeys/publickey1.txt",std::ios_base::app);
     std::ofstream of_c1("keys",std::ios_base::app);
@@ -231,7 +263,13 @@ int main(int argc, char const* argv[]){
     cout << ("\n----Sending to server----\n");
     Client_socket C1;
     C1.start_everything(4383,1, "client");
+
+
     C1.transmit_file();
+    gettimeofday(&endpub, NULL);
+    get_timepub = (endpub.tv_sec - startpub.tv_sec) + (endpub.tv_usec - startpub.tv_usec) * 1.0E-6;
+    printf("Time taken to send private key: %lf[sec]\n", get_timepub);
+    gettimeofday(&startpub, NULL);
 
     //Send private key to c1
     remove("keys");
