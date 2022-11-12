@@ -232,7 +232,7 @@ class Server_socket{
 	    
             } else {
 
-                const char* array[2] ={"69.69.69.5","69.69.69.2"};
+                const char* array[2] ={"192.168.0.5","192.168.0.2"};
 
                 if(inet_pton(AF_INET, array[option], &address.sin_addr)<=0) {
                       cout<<"[ERROR] : Invalid address\n";
