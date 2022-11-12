@@ -25,11 +25,11 @@ For more details, do look in `doc` for a detailed explanation and analysis of Cu
 
 
 #### Subnet
-  1. Server: 69.69.69.1
-  2. Verif: 69.69.69.2
-  3. Client1: 69.69.69.3
-  4. Client2: 69.69.69.4
-  5. KeyGen: 69.69.69.5
+  1. Server: 192.168.0.1
+  2. Verif: 192.168.0.2
+  3. Client1: 192.168.0.3
+  4. Client2: 192.168.0.4
+  5. KeyGen: 192.168.0.5
 
 
 ### Installation (Linux)
