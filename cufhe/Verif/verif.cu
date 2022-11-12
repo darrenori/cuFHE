@@ -56,7 +56,7 @@ class Client_socket{
 
             } else {
 
-                if(inet_pton(AF_INET, "69.69.69.1", &address.sin_addr)<=0) {
+                if(inet_pton(AF_INET, "192.168.0.1", &address.sin_addr)<=0) {
                         cout<<"[ERROR] : Invalid address\n";
                 }
 
