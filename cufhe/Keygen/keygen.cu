@@ -55,7 +55,7 @@ class Client_socket{
 
             } else {
 
-	        const char* array[4] ={"69.69.69.2","69.69.69.1","69.69.69.3","69.69.69.4"};
+	        const char* array[4] ={"192.168.0.2","192.168.0.1","192.168.0.3","192.168.0.4"};
 
             	if(inet_pton(AF_INET, array[option], &address.sin_addr)<=0) { 
                       cout<<"[ERROR] : Invalid address\n";
